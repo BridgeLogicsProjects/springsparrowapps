@@ -32,6 +32,7 @@ import { useState, useEffect } from 'react';
 import TestButton from './components/TestButton';
 import BookingForm from './components/BookingForm';
 import BreakdownModal from './components/BreakdownModal';
+import AllBookingsModal from './components/AllBookingsModal';
 import { Home, TrendingUp, Gem, DollarSign, Zap, BarChart3, CheckCircle } from 'lucide-react';
 import { getBookingsByMonth, getCurrentMonth } from './services/firebase/firestoreService';
 import robinsRoostImg from './assets/robinsroost_thumbnail.png';
@@ -53,6 +54,9 @@ function App() {
   
   // Breakdown modal state
   const [showBreakdown, setShowBreakdown] = useState(false);
+
+  // All Bookings modal state
+  const [showAllBookings, setShowAllBookings] = useState(false);
   
   // Hardcoded user ID for now (will add auth later)
   const userId = 'B52ye9yyQ0QINoHdEe4nH5niDef2';
@@ -202,6 +206,22 @@ function App() {
     // Refresh data
     window.location.reload();
   };
+
+  // Handle delete booking 
+ const handleDeleteBooking = async (bookingId) => {
+  try {
+    // We'll add the deleteBooking function to firestoreService next
+    const { deleteBooking } = await import('./services/firebase/firestoreService');
+    await deleteBooking(userId, bookingId);
+    
+    // Refresh bookings
+    const monthBookings = await getBookingsByMonth(userId, currentMonth);
+    setBookings(monthBookings);
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    alert('Failed to delete booking: ' + error.message);
+  }
+};
 
   // ========================================================================
   // LOADING & ERROR STATES
@@ -388,13 +408,24 @@ function App() {
         {/* BEGIN: Unit Performance Cards                                */}
         {/* ============================================================ */}
         <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Home className="w-5 h-5 text-primary-600" />
-            <h2 className="text-lg font-semibold text-neutral-900">
-              Unit Performance
-            </h2>
-          </div>
-          
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Home className="w-5 h-5 text-primary-600" />
+              <h2 className="text-lg font-semibold text-neutral-900">
+                Unit Performance
+              </h2>
+            </div>
+
+            {/* View All Bookings Button - ADD THIS */}
+            {bookings.length > 0 && (
+              <button
+                onClick={() => setShowAllBookings(true)}
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+              >
+                View All Bookings →
+              </button>
+            )}
+          </div>  
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {units.map(unit => (
               <div 
@@ -577,6 +608,15 @@ function App() {
           <BreakdownModal
             bookings={bookings}
             onClose={() => setShowBreakdown(false)}
+          />
+        )}
+
+        {/* All Bookings Modal - ADD THIS */}
+        {showAllBookings && (
+          <AllBookingsModal
+            bookings={bookings}
+            onClose={() => setShowAllBookings(false)}
+            onDelete={handleDeleteBooking}
           />
         )}
       </main>

@@ -312,3 +312,22 @@ export async function deleteAllBookings(userId) {
       throw error;
     }
   }
+
+/**
+* DELETE A SINGLE BOOKING
+* 
+* @param {string} userId - Current user's ID
+* @param {string} bookingId - Booking document ID to delete
+* @returns {Promise<void>}
+*/
+export async function deleteBooking(userId, bookingId) {
+  try {
+    const bookingRef = doc(db, 'users', userId, 'bookings', bookingId);
+    await deleteDoc(bookingRef);
+
+    console.log(`Deleted booking: ${bookingId}`);
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    throw error;
+  }
+}

@@ -4,12 +4,16 @@
  * ============================================================================
  *
  * Component: TestButton
- * Version: 2.2.0 - FINAL
- * Last Updated: 2026-02-15
+ * Version: 2.3.0
+ * Last Updated: 2026-02-27
  *
  * PURPOSE:
  * Firebase test card with sign-in, test booking, reset data, and DEMO MODE.
  * Demo mode loads realistic mock data to show Tie how the app will work.
+ *
+ * CHANGELOG v2.3.0:
+ * - Fixed handleClearMockData - moved outside handleResetData
+ * - Added dynamic imports for Firebase functions in clearMockData
  *
  * ============================================================================
  */
@@ -142,6 +146,54 @@ function TestButton() {
     }
   };
 
+  const handleClearMockData = async () => {
+    if (!user) {
+      setMessage('❌ Sign in first');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      '🗑️ This will delete ONLY mock data bookings.\n\nYour real data will be safe!\n\nContinue?'
+    );
+    
+    if (!confirmed) return;
+
+    setLoading(true);
+    setMessage('Clearing mock data...');
+
+    try {
+      const userId = user.uid;
+      
+      // Dynamic imports for Firebase Firestore functions
+      const { collection, query, where, getDocs, deleteDoc } = await import('firebase/firestore');
+      const { db } = await import('../firebase/firebaseConfig.js');
+      
+      const bookingsRef = collection(db, 'users', userId, 'bookings');
+      
+      // Get all bookings with mock data flag
+      const q = query(bookingsRef, where('isMockData', '==', true));
+      const snapshot = await getDocs(q);
+      
+      let deletedCount = 0;
+      
+      for (const doc of snapshot.docs) {
+        await deleteDoc(doc.ref);
+        deletedCount++;
+      }
+      
+      setMessage(`✅ Cleared ${deletedCount} mock bookings. Refreshing...`);
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error('Error clearing mock data:', error);
+      setMessage(`❌ Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLoadMockData = async () => {
     if (!user) {
       setMessage('❌ Sign in first');
@@ -259,7 +311,14 @@ function TestButton() {
       let addedCount = 0;
       for (const booking of mockBookings) {
         console.log(`➕ Adding booking ${addedCount + 1}/${mockBookings.length}...`);
-        const bookingId = await addBooking(userId, booking);
+
+        // Add mock data flag so we can clear it later
+        const bookingId = await addBooking(userId, {
+          ...booking,
+          isMockData: true,        // Flag it as mock data
+          mockDataVersion: '1.2.0' // Track which version
+        });
+
         console.log(`✅ Added booking with ID: ${bookingId}`);
         addedCount++;
       }
@@ -347,6 +406,15 @@ function TestButton() {
               {loading ? 'Loading...' : '🎬 Load Mock Data (Demo for Tie)'}
             </button>
 
+            {/* Clear Mock Data Button */}
+            <button
+              onClick={handleClearMockData}
+              disabled={loading}
+              className="w-full px-5 py-3.5 bg-orange-100 border-2 border-orange-600 text-orange-900 hover:bg-orange-200 disabled:bg-neutral-100 disabled:border-neutral-300 disabled:text-neutral-500 rounded-lg font-medium transition-colors"
+            >
+              {loading ? 'Clearing...' : '🗑️ Clear Mock Data Only'}
+            </button>
+
             {/* Reset All Bookings Button */}
             <button
               onClick={handleResetData}
@@ -371,7 +439,7 @@ function TestButton() {
       {message && (
         <p
           className={`mt-[30px] text-sm p-[5px] ${
-            message.includes('Success') || message.includes('Signed in') || message.includes('Deleted') || message.includes('Demo data')
+            message.includes('Success') || message.includes('Signed in') || message.includes('Deleted') || message.includes('Demo data') || message.includes('Cleared')
               ? 'text-success-600'
               : 'text-danger-600'
           }`}
