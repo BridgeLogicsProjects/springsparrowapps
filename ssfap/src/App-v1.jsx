@@ -4,8 +4,8 @@
  * ============================================================================
  * 
  * Component: App (Main Dashboard)
- * Version: 1.4.0 - PRODUCTION READY
- * Last Updated: 2026-03-09
+ * Version: 1.2.0 - FINAL
+ * Last Updated: 2026-02-15
  * 
  * PURPOSE:
  * Main dashboard showing Spring Sparrow LLC's financial health at a glance.
@@ -16,19 +16,13 @@
  * Dove's Den, Stadium District). Shows real-time financial position to make
  * strategic decisions: MTR vs STR, when to spend, distribution timing.
  * 
- * CHANGELOG v1.4.0:
- * - FIXED: Removed mock CapEx data ($10,565 → $5,002.98 from Baselane)
- * - FIXED: Removed mock Distributions data ($4,689 → $0)
- * - FIXED: Month filtering - bookings now filtered by month field
- * - ADDED: Month selector dropdown (Jan/Feb/Mar 2026)
- * - UPDATED: Real Baselane integration ready
- * - All unit calculations now respect selected month
- * 
- * PREVIOUS CHANGELOG v1.2.0:
+ * CHANGELOG v1.2.0:
  * - Added STR vs MTR breakdown modal
+ * - Mock data populates CapEx and Distributions when loaded
  * - Custom status indicators (danger=red, pending=yellow)
  * - Updated action item text with Financial Therapist note
  * - All images working (imported from src/assets)
+ * - Mock data integration complete for Tie demo
  * - BEGIN/END comments on all major sections
  * 
  * ============================================================================
@@ -54,9 +48,6 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Month selector state (NEW in v1.4.0)
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
-  
   // Booking form modal state
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
@@ -69,6 +60,7 @@ function App() {
   
   // Hardcoded user ID for now (will add auth later)
   const userId = 'B52ye9yyQ0QINoHdEe4nH5niDef2';
+  const currentMonth = getCurrentMonth();
   
   // ========================================================================
   // FETCH DATA FROM FIREBASE
@@ -79,11 +71,11 @@ function App() {
       try {
         setLoading(true);
         
-        // Get selected month's bookings (FIXED in v1.4.0)
-        const monthBookings = await getBookingsByMonth(userId, selectedMonth);
+        // Get current month's bookings
+        const monthBookings = await getBookingsByMonth(userId, currentMonth);
         setBookings(monthBookings);
         
-        console.log('Loaded bookings for', selectedMonth, ':', monthBookings);
+        console.log('Loaded bookings:', monthBookings);
       } catch (err) {
         console.error('Error loading data:', err);
         setError(err.message);
@@ -93,34 +85,34 @@ function App() {
     }
     
     fetchData();
-  }, [userId, selectedMonth]); // Re-fetch when month changes
+  }, [userId, currentMonth]);
   
   // ========================================================================
-  // CALCULATE METRICS FROM REAL DATA (FIXED in v1.4.0)
+  // CALCULATE METRICS FROM REAL DATA
   // ========================================================================
   
-  // Filter bookings for displayed month (FIXED - now using selectedMonth)
-  const currentMonthBookings = bookings.filter(b => b.month === selectedMonth);
+  // Calculate total income from bookings
+  const totalIncome = bookings.reduce((sum, booking) => sum + booking.netIncome, 0);
   
-  // Calculate total income from current month's bookings only
-  const totalIncome = currentMonthBookings.reduce((sum, booking) => sum + booking.netIncome, 0);
-  
-  // Count nights by unit (for current month only)
-  const unitNights = currentMonthBookings.reduce((acc, booking) => {
+  // Count nights by unit
+  const unitNights = bookings.reduce((acc, booking) => {
     if (!acc[booking.unitId]) acc[booking.unitId] = 0;
     acc[booking.unitId] += booking.nights;
     return acc;
   }, {});
   
   // ========================================================================
-  // REAL BASELANE DATA (FIXED in v1.4.0 - Mock data removed!)
+  // MOCK DATA - Shows when bookings exist (for demo)
   // ========================================================================
   
-  // REAL CapEx Reserve from Baselane (as of March 9, 2026)
-  const capexReserve = {
-    current: 5002.98,  // Real balance from Baselane account 7743
+  const capexReserve = bookings.length > 0 ? {
+    current: 10565,
     target: 20000,
-    percentage: 25,    // 5,002.98 / 20,000 = 25%
+    percentage: 53,
+  } : {
+    current: 0,
+    target: 20000,
+    percentage: 0,
   };
   
   const monthlyIncome = {
@@ -136,7 +128,7 @@ function App() {
       image: robinsRoostImg,
       nights: unitNights['robins-roost'] || 0,
       target: 15,
-      netIncome: currentMonthBookings
+      netIncome: bookings
         .filter(b => b.unitId === 'robins-roost')
         .reduce((sum, b) => sum + b.netIncome, 0),
       status: (unitNights['robins-roost'] || 0) >= 15 ? 'success' : 'warning',
@@ -147,7 +139,7 @@ function App() {
       image: dovesDenImg,
       nights: unitNights['doves-den'] || 0,
       target: 15,
-      netIncome: currentMonthBookings
+      netIncome: bookings
         .filter(b => b.unitId === 'doves-den')
         .reduce((sum, b) => sum + b.netIncome, 0),
       status: (unitNights['doves-den'] || 0) >= 15 ? 'success' : 'warning',
@@ -158,16 +150,19 @@ function App() {
       image: stadiumDistrictImg,
       nights: unitNights['stadium-district'] || 0,
       target: 18,
-      netIncome: currentMonthBookings
+      netIncome: bookings
         .filter(b => b.unitId === 'stadium-district')
         .reduce((sum, b) => sum + b.netIncome, 0),
       status: (unitNights['stadium-district'] || 0) >= 18 ? 'success' : 'warning',
     },
   ];
   
-  // REAL Owner Distributions from Baselane (FIXED in v1.4.0)
-  const distributions = {
-    total: 0,      // Real balance from Baselane (currently empty account)
+  const distributions = bookings.length > 0 ? {
+    total: 4689,
+    keeya: 2344,
+    tie: 2345,
+  } : {
+    total: 0,
     keeya: 0,
     tie: 0,
   };
@@ -213,28 +208,21 @@ function App() {
   };
 
   // Handle delete booking 
-  const handleDeleteBooking = async (bookingId) => {
-    try {
-      // We'll add the deleteBooking function to firestoreService next
-      const { deleteBooking } = await import('./services/firebase/firestoreService');
-      await deleteBooking(userId, bookingId);
-      
-      // Refresh bookings
-      const monthBookings = await getBookingsByMonth(userId, selectedMonth);
-      setBookings(monthBookings);
-    } catch (error) {
-      console.error('Error deleting booking:', error);
-      alert('Failed to delete booking: ' + error.message);
-    }
-  };
+ const handleDeleteBooking = async (bookingId) => {
+  try {
+    // We'll add the deleteBooking function to firestoreService next
+    const { deleteBooking } = await import('./services/firebase/firestoreService');
+    await deleteBooking(userId, bookingId);
+    
+    // Refresh bookings
+    const monthBookings = await getBookingsByMonth(userId, currentMonth);
+    setBookings(monthBookings);
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    alert('Failed to delete booking: ' + error.message);
+  }
+};
 
-  // Format month for display (NEW in v1.4.0)
-  const formatMonthDisplay = (monthString) => {
-    const [year, month] = monthString.split('-');
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${monthNames[parseInt(month) - 1]} ${year}`;
-  };
-  
   // ========================================================================
   // LOADING & ERROR STATES
   // ========================================================================
@@ -270,7 +258,7 @@ function App() {
     <div className="min-h-screen bg-neutral-50">
       
       {/* ============================================================ */}
-      {/* BEGIN: Header with Month Selector (UPDATED in v1.4.0)        */}
+      {/* BEGIN: Header with Mock Data Banner                          */}
       {/* ============================================================ */}
       <header className="bg-white border-b border-neutral-200 px-4 py-4">
         <div className="max-w-7xl mx-auto">
@@ -279,41 +267,31 @@ function App() {
               <h1 className="text-2xl font-bold text-neutral-900">
                 Spring Sparrow
               </h1>
-              
-              {/* Month Selector Dropdown (NEW in v1.4.0) */}
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="mt-1 text-sm text-neutral-700 bg-white border border-neutral-300 rounded-md px-3 py-1.5 cursor-pointer hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-              >
-                <option value="2026-03">March 2026</option>
-                <option value="2026-02">February 2026</option>
-                <option value="2026-01">January 2026</option>
-              </select>
+              <p className="text-sm text-neutral-600 mt-1">Jan 2026</p>
             </div>
             
-            {/* Data Status Banner */}
+            {/* Mock Data Banner */}
             {bookings.length > 0 ? (
-              <div className="bg-green-50 border-2 border-green-400 px-4 py-2 rounded-lg flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+              <div className="bg-yellow-50 border-2 border-yellow-400 px-4 py-2 rounded-lg flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-yellow-600" />
                 <div>
-                  <p className="text-sm font-semibold text-green-900">
-                    Real Data Active
+                  <p className="text-sm font-semibold text-yellow-900">
+                    Mock Data Demo
                   </p>
-                  <p className="text-xs text-green-700">
-                    {bookings.length} booking{bookings.length !== 1 ? 's' : ''} for {formatMonthDisplay(selectedMonth)}
+                  <p className="text-xs text-yellow-700">
+                    Real data coming Monday
                   </p>
                 </div>
               </div>
             ) : (
               <div className="bg-blue-50 border-2 border-blue-400 px-4 py-2 rounded-lg flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-600" />
+                <CheckCircle className="w-5 h-5 text-blue-600" />
                 <div>
                   <p className="text-sm font-semibold text-blue-900">
-                    No Bookings Yet
+                    Ready for Real Data
                   </p>
                   <p className="text-xs text-blue-700">
-                    Add bookings for {formatMonthDisplay(selectedMonth)}
+                    Add bookings to get started
                   </p>
                 </div>
               </div>
@@ -322,7 +300,7 @@ function App() {
         </div>
       </header>
       {/* ============================================================ */}
-      {/* END: Header with Month Selector                              */}
+      {/* END: Header with Mock Data Banner                            */}
       {/* ============================================================ */}
 
       {/* Main Content */}
@@ -333,7 +311,7 @@ function App() {
         {/* ============================================================ */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
-          {/* CapEx Reserve Card (FIXED in v1.4.0 - Real Baselane data) */}
+          {/* CapEx Reserve Card */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -342,8 +320,10 @@ function App() {
                   CapEx Reserve
                 </h2>
               </div>
-              <span className="text-sm font-medium text-success-600">
-                On track
+              <span className={`text-sm font-medium ${
+                capexReserve.current > 0 ? 'text-success-600' : 'text-neutral-400'
+              }`}>
+                {capexReserve.current > 0 ? 'On track' : 'Not started'}
               </span>
             </div>
             
@@ -367,9 +347,6 @@ function App() {
               <p className="text-sm text-neutral-600">
                 {capexReserve.percentage}% • Target: Dec 31, 2026
               </p>
-              <p className="text-xs text-neutral-500 mt-2">
-                💡 Real balance from Baselane account 7743
-              </p>
             </div>
           </div>
           
@@ -379,15 +356,13 @@ function App() {
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary-600" />
                 <h2 className="text-lg font-semibold text-neutral-900">
-                  {formatMonthDisplay(selectedMonth)} Net Income
+                  Jan Net Income
                 </h2>
               </div>
               <span className={`text-sm font-medium ${
-                totalIncome >= monthlyIncome.target ? 'text-success-600' : 
                 totalIncome > 0 ? 'text-warning-600' : 'text-neutral-400'
               }`}>
-                {totalIncome >= monthlyIncome.target ? 'On track' : 
-                 totalIncome > 0 ? 'Behind pace' : 'No data yet'}
+                {totalIncome > 0 ? 'Behind pace' : 'No data yet'}
               </span>
             </div>
             
@@ -406,12 +381,12 @@ function App() {
                   className={`h-3 rounded-full transition-all duration-500 ${
                     totalIncome > 0 ? 'bg-warning-500' : 'bg-neutral-300'
                   }`}
-                  style={{ width: `${Math.min(monthlyIncome.percentage, 100)}%` }}
+                  style={{ width: `${monthlyIncome.percentage}%` }}
                 />
               </div>
               
               <p className="text-sm text-neutral-600">
-                {monthlyIncome.percentage}%
+                {monthlyIncome.percentage}% • Need $0/day • 0 days left
               </p>
               
               {bookings.length > 0 && (
@@ -437,11 +412,11 @@ function App() {
             <div className="flex items-center gap-2">
               <Home className="w-5 h-5 text-primary-600" />
               <h2 className="text-lg font-semibold text-neutral-900">
-                Unit Performance - {formatMonthDisplay(selectedMonth)}
+                Unit Performance
               </h2>
             </div>
 
-            {/* View All Bookings Button */}
+            {/* View All Bookings Button - ADD THIS */}
             {bookings.length > 0 && (
               <button
                 onClick={() => setShowAllBookings(true)}
@@ -509,7 +484,7 @@ function App() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
           {/* ============================================================ */}
-          {/* BEGIN: Owner Distributions Card (FIXED in v1.4.0)            */}
+          {/* BEGIN: Owner Distributions Card                              */}
           {/* ============================================================ */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center gap-2 mb-4">
@@ -520,11 +495,19 @@ function App() {
             </div>
             
             <div className="space-y-3">
-              <div className="rounded-lg p-4 border bg-neutral-50 border-neutral-200">
-                <p className="text-sm mb-2 text-neutral-600">
+              <div className={`rounded-lg p-4 border ${
+                distributions.total > 0 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-neutral-50 border-neutral-200'
+              }`}>
+                <p className={`text-sm mb-2 ${
+                  distributions.total > 0 ? 'text-green-700' : 'text-neutral-600'
+                }`}>
                   Ready to distribute
                 </p>
-                <p className="text-2xl font-bold text-neutral-900">
+                <p className={`text-2xl font-bold ${
+                  distributions.total > 0 ? 'text-green-900' : 'text-neutral-900'
+                }`}>
                   {formatCurrency(distributions.total)}
                 </p>
               </div>
@@ -544,16 +527,20 @@ function App() {
                 </div>
               </div>
               
-              <button 
-                disabled
-                className="w-full mt-2 px-4 py-3 bg-neutral-100 border-2 border-neutral-300 text-neutral-500 rounded-lg font-medium cursor-not-allowed"
-              >
-                No funds to distribute
-              </button>
-              
-              <p className="text-xs text-neutral-500 mt-2">
-                💡 Real balance from Baselane distribution account
-              </p>
+              {distributions.total > 0 ? (
+                <button 
+                  className="w-full mt-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+                >
+                  Distribute Now
+                </button>
+              ) : (
+                <button 
+                  disabled
+                  className="w-full mt-2 px-4 py-3 bg-neutral-100 border-2 border-neutral-300 text-neutral-500 rounded-lg font-medium cursor-not-allowed"
+                >
+                  No funds to distribute
+                </button>
+              )}
             </div>
           </div>
           {/* ============================================================ */}
@@ -619,15 +606,15 @@ function App() {
         {/* Breakdown Modal */}
         {showBreakdown && (
           <BreakdownModal
-            bookings={currentMonthBookings}
+            bookings={bookings}
             onClose={() => setShowBreakdown(false)}
           />
         )}
 
-        {/* All Bookings Modal */}
+        {/* All Bookings Modal - ADD THIS */}
         {showAllBookings && (
           <AllBookingsModal
-            bookings={currentMonthBookings}
+            bookings={bookings}
             onClose={() => setShowAllBookings(false)}
             onDelete={handleDeleteBooking}
           />
