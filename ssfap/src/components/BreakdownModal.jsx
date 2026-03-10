@@ -168,12 +168,12 @@ function BreakdownModal({ bookings, onClose, currentMonth }) {
   // ========================================================================
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* ============================================================ */}
         {/* Header with Time Period Selector                             */}
         {/* ============================================================ */}
-        <div className="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 z-10">
+        <div className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-neutral-200 px-6 py-4 z-10">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-bold text-neutral-900">Revenue Breakdown</h2>
             <button

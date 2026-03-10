@@ -4,7 +4,7 @@
  * ============================================================================
  * 
  * Component: App (Main Dashboard)
- * Version: 1.5.0 - PRODUCTION WITH AUTH
+ * Version: 1.6.0 - UNIT DETAIL MODAL + TAX TRACKING
  * Last Updated: 2026-03-10
  * 
  * PURPOSE:
@@ -16,13 +16,12 @@
  * Dove's Den, Stadium District). Shows real-time financial position to make
  * strategic decisions: MTR vs STR, when to spend, distribution timing.
  * 
- * CHANGELOG v1.5.0:
- * - ADDED: Complete authentication system (Sign In/Out)
- * - ADDED: Demo Mode toggle in header
- * - ADDED: Status banner showing auth state and data mode
- * - IMPROVED: Clean header with auth controls
- * - UPDATED: TestButton moved to hidden dev mode (optional)
- * - All auth states clearly indicated to user
+ * CHANGELOG v1.6.0:
+ * - ADDED: UnitDetailModal - Click unit cards to see detailed breakdown
+ * - ADDED: Actual vs Potential revenue tracking (critical for MTR!)
+ * - ADDED: Tax column in revenue tables (12.5% Pierce County)
+ * - IMPROVED: Clean console logging for debugging
+ * - FIX: All imports and modal renders working
  * 
  * PREVIOUS CHANGELOG v1.4.0:
  * - FIXED: Removed mock CapEx data ($10,565 → $5,002.98 from Baselane)
@@ -40,6 +39,7 @@ import SignInModal from './components/SignInModal';
 import BookingForm from './components/BookingForm';
 import BreakdownModal from './components/BreakdownModal';
 import AllBookingsModal from './components/AllBookingsModal';
+import UnitDetailModal from './components/UnitDetailModal';
 import { 
   Home, 
   TrendingUp, 
@@ -943,6 +943,19 @@ function App() {
           bookings={currentMonthBookings}
           onClose={() => setShowAllBookings(false)}
           onDelete={handleDeleteBooking}
+        />
+      )}
+
+      {/* Unit Detail Modal */}
+      {showUnitDetail && selectedUnitForDetail && (
+        <UnitDetailModal
+          unit={selectedUnitForDetail}
+          bookings={currentMonthBookings.filter(b => b.unitId === selectedUnitForDetail.id)}
+          onClose={() => {
+            setShowUnitDetail(false);
+            setSelectedUnitForDetail(null);
+          }}
+          currentMonth={selectedMonth}
         />
       )}
     </div>
