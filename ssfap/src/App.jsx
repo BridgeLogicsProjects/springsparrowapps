@@ -189,6 +189,11 @@ function App() {
 
   // All Bookings modal state
   const [showAllBookings, setShowAllBookings] = useState(false);
+
+  // Unit detail modal state 
+  const [showUnitDetail, setShowUnitDetail] = useState(false); 
+  const [selectedUnitForDetail, setSelectedUnitForDetail] = useState(null); 
+
   
   // Hardcoded user ID for now
   const userId = 'B52ye9yyQ0QINoHdEe4nH5niDef2';
@@ -383,6 +388,13 @@ function App() {
       console.error('Error deleting booking:', error);
       alert('Failed to delete booking: ' + error.message);
     }
+  };
+
+  const handleUnitClick = (unit) => {
+    console.log('🎯 handleUnitClick called with:', unit);
+    setSelectedUnitForDetail(unit);
+    setShowUnitDetail(true);
+    console.log('✅ Modal state set - showUnitDetail:', true);
   };
 
   const handleSignOut = async () => {
@@ -707,80 +719,100 @@ function App() {
         {/* END: Top Metrics Row                                         */}
         {/* ============================================================ */}
 
-        {/* ============================================================ */}
-        {/* BEGIN: Unit Performance Cards                                */}
-        {/* ============================================================ */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Home className="w-5 h-5 text-primary-600" />
-              <h2 className="text-lg font-semibold text-neutral-900">
-                Unit Performance - {formatMonthDisplay(selectedMonth)}
-              </h2>
-            </div>
+       {/* ============================================================ */}
+{/* BEGIN: Unit Performance Cards                                */}
+{/* ============================================================ */}
+<div>
+  {/* Section Header */}
+  <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center gap-2">
+      <Home className="w-5 h-5 text-primary-600" />
+      <h2 className="text-lg font-semibold text-neutral-900">
+        Unit Performance - {formatMonthDisplay(selectedMonth)}
+      </h2>
+    </div>
 
-            {bookings.length > 0 && (
-              <button
-                onClick={() => setShowAllBookings(true)}
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
-              >
-                View All Bookings →
-              </button>
-            )}
-          </div>  
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {units.map(unit => (
-              <div 
-                key={unit.id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden border border-neutral-200"
-              >
-                <div className="relative h-48 bg-neutral-100">
-                  <img 
-                    src={unit.image} 
-                    alt={unit.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                <div className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-neutral-900">
-                      {unit.name}
-                    </h3>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">Nights</span>
-                      <span className={`font-semibold ${getStatusColor(unit.status)}`}>
-                        {unit.nights} / {unit.target}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-neutral-600">Net Income</span>
-                      <span className={`font-semibold ${unit.netIncome >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
-                        {formatCurrency(unit.netIncome)}
-                      </span>
-                    </div>
-                    
-                    <button 
-                      onClick={() => handleAddBooking(unit.id)}
-                      disabled={!user}
-                      className="w-full mt-2 px-4 py-2 bg-blue-100 border-2 border-blue-600 text-blue-900 hover:bg-blue-200 disabled:bg-neutral-100 disabled:border-neutral-300 disabled:text-neutral-400 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors"
-                      title={!user ? 'Sign in to add bookings' : ''}
-                    >
-                      + Add Booking
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+    {/* View All Bookings Button */}
+    {bookings.length > 0 && (
+      <button
+        onClick={() => setShowAllBookings(true)}
+        className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+      >
+        View All Bookings →
+      </button>
+    )}
+  </div>  
+  
+  {/* Unit Cards Grid */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    {units.map(unit => (
+      <div 
+        key={unit.id}
+        onClick={() => {
+          console.log('🖱️ Unit card clicked!', unit.id);
+          console.log('📦 Unit data:', unit);
+          handleUnitClick(unit);
+        }}
+        className="bg-white rounded-xl shadow-sm overflow-hidden border border-neutral-200 cursor-pointer hover:shadow-lg hover:border-primary-300 transition-all"
+      >
+        {/* Unit Image */}
+        <div className="relative h-48 bg-neutral-100">
+          <img 
+            src={unit.image} 
+            alt={unit.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        
+        {/* Unit Details */}
+        <div className="p-6">
+          {/* Unit Name */}
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-neutral-900">
+              {unit.name}
+            </h3>
+          </div>
+          
+          {/* Unit Stats */}
+          <div className="space-y-3">
+            {/* Nights */}
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-neutral-600">Nights</span>
+              <span className={`font-semibold ${getStatusColor(unit.status)}`}>
+                {unit.nights} / {unit.target}
+              </span>
+            </div>
+            
+            {/* Net Income */}
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-neutral-600">Net Income</span>
+              <span className={`font-semibold ${unit.netIncome >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
+                {formatCurrency(unit.netIncome)}
+              </span>
+            </div>
+            
+            {/* Add Booking Button */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation(); // CRITICAL: Prevent card click
+                console.log('➕ Add Booking button clicked for:', unit.id);
+                handleAddBooking(unit.id);
+              }}
+              disabled={!user}
+              className="w-full mt-2 px-4 py-2 bg-blue-100 border-2 border-blue-600 text-blue-900 hover:bg-blue-200 disabled:bg-neutral-100 disabled:border-neutral-300 disabled:text-neutral-400 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors"
+              title={!user ? 'Sign in to add bookings' : ''}
+            >
+              + Add Booking
+            </button>
           </div>
         </div>
-        {/* ============================================================ */}
-        {/* END: Unit Performance Cards                                  */}
-        {/* ============================================================ */}
+      </div>
+    ))}
+  </div>
+</div>
+{/* ============================================================ */}
+{/* END: Unit Performance Cards                                  */}
+{/* ============================================================ */}
 
         {/* ============================================================ */}
         {/* BEGIN: Bottom Row (Distributions + Action Items)             */}
