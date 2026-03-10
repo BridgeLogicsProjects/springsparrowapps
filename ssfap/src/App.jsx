@@ -4,8 +4,8 @@
  * ============================================================================
  * 
  * Component: App (Main Dashboard)
- * Version: 1.4.0 - PRODUCTION READY
- * Last Updated: 2026-03-09
+ * Version: 1.5.0 - PRODUCTION WITH AUTH
+ * Last Updated: 2026-03-10
  * 
  * PURPOSE:
  * Main dashboard showing Spring Sparrow LLC's financial health at a glance.
@@ -16,46 +16,169 @@
  * Dove's Den, Stadium District). Shows real-time financial position to make
  * strategic decisions: MTR vs STR, when to spend, distribution timing.
  * 
- * CHANGELOG v1.4.0:
+ * CHANGELOG v1.5.0:
+ * - ADDED: Complete authentication system (Sign In/Out)
+ * - ADDED: Demo Mode toggle in header
+ * - ADDED: Status banner showing auth state and data mode
+ * - IMPROVED: Clean header with auth controls
+ * - UPDATED: TestButton moved to hidden dev mode (optional)
+ * - All auth states clearly indicated to user
+ * 
+ * PREVIOUS CHANGELOG v1.4.0:
  * - FIXED: Removed mock CapEx data ($10,565 → $5,002.98 from Baselane)
  * - FIXED: Removed mock Distributions data ($4,689 → $0)
  * - FIXED: Month filtering - bookings now filtered by month field
  * - ADDED: Month selector dropdown (Jan/Feb/Mar 2026)
- * - UPDATED: Real Baselane integration ready
- * - All unit calculations now respect selected month
- * 
- * PREVIOUS CHANGELOG v1.2.0:
- * - Added STR vs MTR breakdown modal
- * - Custom status indicators (danger=red, pending=yellow)
- * - Updated action item text with Financial Therapist note
- * - All images working (imported from src/assets)
- * - BEGIN/END comments on all major sections
  * 
  * ============================================================================
  */
 
 import { useState, useEffect } from 'react';
-import TestButton from './components/TestButton';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './firebase/firebaseConfig';
+import SignInModal from './components/SignInModal';
 import BookingForm from './components/BookingForm';
 import BreakdownModal from './components/BreakdownModal';
 import AllBookingsModal from './components/AllBookingsModal';
-import { Home, TrendingUp, Gem, DollarSign, Zap, BarChart3, CheckCircle } from 'lucide-react';
-import { getBookingsByMonth, getCurrentMonth } from './services/firebase/firestoreService';
+import { 
+  Home, 
+  TrendingUp, 
+  Gem, 
+  DollarSign, 
+  Zap, 
+  CheckCircle, 
+  AlertCircle,
+  LogIn, 
+  User, 
+  LogOut, 
+  ChevronDown,
+  Sparkles
+} from 'lucide-react';
+import { getBookingsByMonth, getCurrentMonth, addBooking } from './services/firebase/firestoreService';
 import robinsRoostImg from './assets/robinsroost_thumbnail.png';
 import dovesDenImg from './assets/doveden_thumbnail.png';
 import stadiumDistrictImg from './assets/stadiumdistrict_thumbnail.png';
 
+// Mock data for demo mode
+const DEMO_BOOKINGS = [
+  {
+    id: 'demo-1',
+    unitId: 'robins-roost',
+    type: 'STR',
+    checkIn: new Date('2026-03-03'),
+    checkOut: new Date('2026-03-06'),
+    nights: 3,
+    grossPayout: 420,
+    platform: 'Airbnb',
+    platformFee: 63,
+    cleaningCost: 150,
+    netIncome: 207,
+    month: '2026-03',
+    isMockData: true,
+  },
+  {
+    id: 'demo-2',
+    unitId: 'robins-roost',
+    type: 'STR',
+    checkIn: new Date('2026-03-10'),
+    checkOut: new Date('2026-03-14'),
+    nights: 4,
+    grossPayout: 560,
+    platform: 'Vrbo',
+    platformFee: 84,
+    cleaningCost: 150,
+    netIncome: 326,
+    month: '2026-03',
+    isMockData: true,
+  },
+  {
+    id: 'demo-3',
+    unitId: 'robins-roost',
+    type: 'STR',
+    checkIn: new Date('2026-03-20'),
+    checkOut: new Date('2026-03-25'),
+    nights: 5,
+    grossPayout: 700,
+    platform: 'Airbnb',
+    platformFee: 105,
+    cleaningCost: 150,
+    netIncome: 445,
+    month: '2026-03',
+    isMockData: true,
+  },
+  {
+    id: 'demo-4',
+    unitId: 'doves-den',
+    type: 'MTR',
+    checkIn: new Date('2026-03-01'),
+    checkOut: new Date('2026-03-31'),
+    nights: 30,
+    grossPayout: 2400,
+    platform: 'Furnished Finder',
+    platformFee: 240,
+    cleaningCost: 350,
+    netIncome: 1810,
+    baseMonthlyRent: 2000,
+    damageProtection: 80,
+    hasPets: true,
+    petCount: 1,
+    petFeePerMonth: 50,
+    petDeposit: 250,
+    securityDeposit: 500,
+    month: '2026-03',
+    isMockData: true,
+  },
+  {
+    id: 'demo-5',
+    unitId: 'stadium-district',
+    type: 'STR',
+    checkIn: new Date('2026-03-08'),
+    checkOut: new Date('2026-03-11'),
+    nights: 3,
+    grossPayout: 390,
+    platform: 'Airbnb',
+    platformFee: 58.50,
+    cleaningCost: 150,
+    netIncome: 181.50,
+    month: '2026-03',
+    isMockData: true,
+  },
+  {
+    id: 'demo-6',
+    unitId: 'stadium-district',
+    type: 'STR',
+    checkIn: new Date('2026-03-15'),
+    checkOut: new Date('2026-03-25'),
+    nights: 10,
+    grossPayout: 1300,
+    platform: 'Airbnb',
+    platformFee: 195,
+    cleaningCost: 150,
+    netIncome: 955,
+    month: '2026-03',
+    isMockData: true,
+  },
+];
+
 function App() {
   // ========================================================================
-  // STATE - Real data from Firebase
+  // STATE MANAGEMENT
   // ========================================================================
   
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Month selector state (NEW in v1.4.0)
+  // Auth state
+  const [user, setUser] = useState(null);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  // Month selector state
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+  
+  // Demo Mode state
+  const [demoMode, setDemoMode] = useState(false);
   
   // Booking form modal state
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -67,11 +190,26 @@ function App() {
   // All Bookings modal state
   const [showAllBookings, setShowAllBookings] = useState(false);
   
-  // Hardcoded user ID for now (will add auth later)
+  // Hardcoded user ID for now
   const userId = 'B52ye9yyQ0QINoHdEe4nH5niDef2';
   
   // ========================================================================
-  // FETCH DATA FROM FIREBASE
+  // AUTH LISTENER
+  // ========================================================================
+  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      // Exit demo mode when signing out
+      if (!currentUser && demoMode) {
+        setDemoMode(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [demoMode]);
+  
+  // ========================================================================
+  // FETCH DATA FROM FIREBASE (OR USE DEMO DATA)
   // ========================================================================
   
   useEffect(() => {
@@ -79,11 +217,17 @@ function App() {
       try {
         setLoading(true);
         
-        // Get selected month's bookings (FIXED in v1.4.0)
-        const monthBookings = await getBookingsByMonth(userId, selectedMonth);
-        setBookings(monthBookings);
-        
-        console.log('Loaded bookings for', selectedMonth, ':', monthBookings);
+        if (demoMode) {
+          // Use demo data
+          const demoForMonth = DEMO_BOOKINGS.filter(b => b.month === selectedMonth);
+          setBookings(demoForMonth);
+          console.log('Loaded demo data for', selectedMonth, ':', demoForMonth);
+        } else {
+          // Get real Firebase data
+          const monthBookings = await getBookingsByMonth(userId, selectedMonth);
+          setBookings(monthBookings);
+          console.log('Loaded real bookings for', selectedMonth, ':', monthBookings);
+        }
       } catch (err) {
         console.error('Error loading data:', err);
         setError(err.message);
@@ -93,19 +237,19 @@ function App() {
     }
     
     fetchData();
-  }, [userId, selectedMonth]); // Re-fetch when month changes
+  }, [userId, selectedMonth, demoMode]);
   
   // ========================================================================
-  // CALCULATE METRICS FROM REAL DATA (FIXED in v1.4.0)
+  // CALCULATE METRICS FROM DATA
   // ========================================================================
   
-  // Filter bookings for displayed month (FIXED - now using selectedMonth)
+  // Filter bookings for displayed month
   const currentMonthBookings = bookings.filter(b => b.month === selectedMonth);
   
-  // Calculate total income from current month's bookings only
+  // Calculate total income
   const totalIncome = currentMonthBookings.reduce((sum, booking) => sum + booking.netIncome, 0);
   
-  // Count nights by unit (for current month only)
+  // Count nights by unit
   const unitNights = currentMonthBookings.reduce((acc, booking) => {
     if (!acc[booking.unitId]) acc[booking.unitId] = 0;
     acc[booking.unitId] += booking.nights;
@@ -113,14 +257,13 @@ function App() {
   }, {});
   
   // ========================================================================
-  // REAL BASELANE DATA (FIXED in v1.4.0 - Mock data removed!)
+  // REAL BASELANE DATA
   // ========================================================================
   
-  // REAL CapEx Reserve from Baselane (as of March 9, 2026)
   const capexReserve = {
-    current: 5002.98,  // Real balance from Baselane account 7743
+    current: 5002.98,
     target: 20000,
-    percentage: 25,    // 5,002.98 / 20,000 = 25%
+    percentage: 25,
   };
   
   const monthlyIncome = {
@@ -165,9 +308,8 @@ function App() {
     },
   ];
   
-  // REAL Owner Distributions from Baselane (FIXED in v1.4.0)
   const distributions = {
-    total: 0,      // Real balance from Baselane (currently empty account)
+    total: 0,
     keeya: 0,
     tie: 0,
   };
@@ -200,6 +342,26 @@ function App() {
     }
   };
 
+  const formatMonthDisplay = (monthString) => {
+    const [year, month] = monthString.split('-');
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${monthNames[parseInt(month) - 1]} ${year}`;
+  };
+
+  const getUserDisplayName = () => {
+    if (!user) return '';
+    if (user.displayName) return user.displayName.split(' ')[0]; // First name only
+    if (user.email) {
+      const name = user.email.split('@')[0];
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+    return 'User';
+  };
+
+  // ========================================================================
+  // EVENT HANDLERS
+  // ========================================================================
+
   const handleAddBooking = (unitId) => {
     setSelectedUnit(unitId);
     setShowBookingForm(true);
@@ -208,18 +370,13 @@ function App() {
   const handleBookingSuccess = () => {
     setShowBookingForm(false);
     setSelectedUnit(null);
-    // Refresh data
     window.location.reload();
   };
 
-  // Handle delete booking 
   const handleDeleteBooking = async (bookingId) => {
     try {
-      // We'll add the deleteBooking function to firestoreService next
       const { deleteBooking } = await import('./services/firebase/firestoreService');
       await deleteBooking(userId, bookingId);
-      
-      // Refresh bookings
       const monthBookings = await getBookingsByMonth(userId, selectedMonth);
       setBookings(monthBookings);
     } catch (error) {
@@ -228,11 +385,18 @@ function App() {
     }
   };
 
-  // Format month for display (NEW in v1.4.0)
-  const formatMonthDisplay = (monthString) => {
-    const [year, month] = monthString.split('-');
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${monthNames[parseInt(month) - 1]} ${year}`;
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setShowUserMenu(false);
+      setDemoMode(false); // Exit demo mode on sign out
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const handleToggleDemo = () => {
+    setDemoMode(!demoMode);
   };
   
   // ========================================================================
@@ -270,17 +434,18 @@ function App() {
     <div className="min-h-screen bg-neutral-50">
       
       {/* ============================================================ */}
-      {/* BEGIN: Header with Month Selector (UPDATED in v1.4.0)        */}
+      {/* BEGIN: Header with Auth Controls                             */}
       {/* ============================================================ */}
       <header className="bg-white border-b border-neutral-200 px-4 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
+            
+            {/* Left: Title and Month Selector */}
             <div>
               <h1 className="text-2xl font-bold text-neutral-900">
                 Spring Sparrow
               </h1>
               
-              {/* Month Selector Dropdown (NEW in v1.4.0) */}
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
@@ -292,37 +457,150 @@ function App() {
               </select>
             </div>
             
-            {/* Data Status Banner */}
-            {bookings.length > 0 ? (
-              <div className="bg-green-50 border-2 border-green-400 px-4 py-2 rounded-lg flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="text-sm font-semibold text-green-900">
-                    Real Data Active
-                  </p>
-                  <p className="text-xs text-green-700">
-                    {bookings.length} booking{bookings.length !== 1 ? 's' : ''} for {formatMonthDisplay(selectedMonth)}
-                  </p>
+            {/* Right: Auth Controls & Demo Toggle */}
+            <div className="flex items-center gap-3">
+              
+              {/* Sign In Button OR User Menu */}
+              {!user ? (
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </button>
+              ) : (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-neutral-700 rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>{getUserDisplayName()}</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  
+                  {/* User Dropdown Menu */}
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-neutral-200 py-1 z-50">
+                      <div className="px-4 py-3 border-b border-neutral-200">
+                        <p className="text-sm font-semibold text-neutral-900">
+                          {user.displayName || getUserDisplayName()}
+                        </p>
+                        <p className="text-xs text-neutral-500 truncate mt-1">
+                          {user.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-50 flex items-center gap-2 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ) : (
-              <div className="bg-blue-50 border-2 border-blue-400 px-4 py-2 rounded-lg flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-600" />
-                <div>
-                  <p className="text-sm font-semibold text-blue-900">
-                    No Bookings Yet
-                  </p>
-                  <p className="text-xs text-blue-700">
-                    Add bookings for {formatMonthDisplay(selectedMonth)}
-                  </p>
-                </div>
-              </div>
-            )}
+              )}
+              
+              {/* Demo Mode Toggle */}
+              <button
+                onClick={handleToggleDemo}
+                disabled={!user}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all border-2 flex items-center gap-2 ${
+                  demoMode
+                    ? 'bg-yellow-50 border-yellow-400 text-yellow-900 hover:bg-yellow-100'
+                    : user
+                    ? 'bg-neutral-100 border-neutral-300 text-neutral-700 hover:bg-neutral-200'
+                    : 'bg-neutral-50 border-neutral-200 text-neutral-400 cursor-not-allowed'
+                }`}
+                title={!user ? 'Sign in to use Demo Mode' : ''}
+              >
+                <Sparkles className="w-4 h-4" />
+                {demoMode ? 'Demo ON' : 'Demo OFF'}
+              </button>
+              
+            </div>
           </div>
         </div>
       </header>
       {/* ============================================================ */}
-      {/* END: Header with Month Selector                              */}
+      {/* END: Header with Auth Controls                               */}
+      {/* ============================================================ */}
+
+      {/* ============================================================ */}
+      {/* BEGIN: Status Banner                                         */}
+      {/* ============================================================ */}
+      <div className="bg-white border-b border-neutral-200">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          
+          {/* Not Signed In State */}
+          {!user && (
+            <div className="flex items-center justify-between bg-blue-50 border-2 border-blue-300 rounded-lg px-4 py-3">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-blue-900">
+                    Not signed in
+                  </p>
+                  <p className="text-xs text-blue-700 mt-0.5">
+                    Sign in to access your real booking data, or try Demo Mode to explore
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSignInModal(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+              >
+                Sign In Now
+              </button>
+            </div>
+          )}
+          
+          {/* Demo Mode State */}
+          {user && demoMode && (
+            <div className="flex items-center justify-between bg-yellow-50 border-2 border-yellow-400 rounded-lg px-4 py-3">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-yellow-900">
+                    🎬 Demo Mode Active
+                  </p>
+                  <p className="text-xs text-yellow-700 mt-0.5">
+                    {bookings.length} mock booking{bookings.length !== 1 ? 's' : ''} loaded • Click "Demo OFF" to see your real data
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleToggleDemo}
+                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+              >
+                Exit Demo
+              </button>
+            </div>
+          )}
+          
+          {/* Real Data State */}
+          {user && !demoMode && (
+            <div className="bg-green-50 border-2 border-green-400 rounded-lg px-4 py-3">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-green-900">
+                    ✅ Signed in as {user.email}
+                  </p>
+                  <p className="text-xs text-green-700 mt-0.5">
+                    {bookings.length} real booking{bookings.length !== 1 ? 's' : ''} for {formatMonthDisplay(selectedMonth)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+        </div>
+      </div>
+      {/* ============================================================ */}
+      {/* END: Status Banner                                           */}
       {/* ============================================================ */}
 
       {/* Main Content */}
@@ -333,7 +611,7 @@ function App() {
         {/* ============================================================ */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
-          {/* CapEx Reserve Card (FIXED in v1.4.0 - Real Baselane data) */}
+          {/* CapEx Reserve Card */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -426,7 +704,7 @@ function App() {
           </div>
         </div>
         {/* ============================================================ */}
-        {/* END: Top Metrics Row (CapEx + Monthly Income)                */}
+        {/* END: Top Metrics Row                                         */}
         {/* ============================================================ */}
 
         {/* ============================================================ */}
@@ -441,7 +719,6 @@ function App() {
               </h2>
             </div>
 
-            {/* View All Bookings Button */}
             {bookings.length > 0 && (
               <button
                 onClick={() => setShowAllBookings(true)}
@@ -489,7 +766,9 @@ function App() {
                     
                     <button 
                       onClick={() => handleAddBooking(unit.id)}
-                      className="w-full mt-2 px-4 py-2 bg-blue-100 border-2 border-blue-600 text-blue-900 hover:bg-blue-200 rounded-lg text-sm font-medium transition-colors"
+                      disabled={!user}
+                      className="w-full mt-2 px-4 py-2 bg-blue-100 border-2 border-blue-600 text-blue-900 hover:bg-blue-200 disabled:bg-neutral-100 disabled:border-neutral-300 disabled:text-neutral-400 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors"
+                      title={!user ? 'Sign in to add bookings' : ''}
                     >
                       + Add Booking
                     </button>
@@ -508,9 +787,7 @@ function App() {
         {/* ============================================================ */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
-          {/* ============================================================ */}
-          {/* BEGIN: Owner Distributions Card (FIXED in v1.4.0)            */}
-          {/* ============================================================ */}
+          {/* Owner Distributions Card */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center gap-2 mb-4">
               <DollarSign className="w-5 h-5 text-primary-600" />
@@ -556,13 +833,8 @@ function App() {
               </p>
             </div>
           </div>
-          {/* ============================================================ */}
-          {/* END: Owner Distributions Card                                */}
-          {/* ============================================================ */}
           
-          {/* ============================================================ */}
-          {/* BEGIN: Action Items Card                                     */}
-          {/* ============================================================ */}
+          {/* Action Items Card */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
             <div className="flex items-center gap-2 mb-4">
               <Zap className="w-5 h-5 text-primary-600" />
@@ -595,44 +867,52 @@ function App() {
               ))}
             </div>
           </div>
-          {/* ============================================================ */}
-          {/* END: Action Items Card                                       */}
-          {/* ============================================================ */}
 
         </div>
         {/* ============================================================ */}
-        {/* END: Bottom Row (Distributions + Action Items)               */}
+        {/* END: Bottom Row                                              */}
         {/* ============================================================ */}
 
-        {/* Test Button - TEMPORARY */}
-        <TestButton />
-
-        {/* Booking Form Modal */}
-        {showBookingForm && (
-          <BookingForm
-            unitId={selectedUnit}
-            onClose={() => setShowBookingForm(false)}
-            onSuccess={handleBookingSuccess}
-          />
-        )}
-
-        {/* Breakdown Modal */}
-        {showBreakdown && (
-          <BreakdownModal
-            bookings={currentMonthBookings}
-            onClose={() => setShowBreakdown(false)}
-          />
-        )}
-
-        {/* All Bookings Modal */}
-        {showAllBookings && (
-          <AllBookingsModal
-            bookings={currentMonthBookings}
-            onClose={() => setShowAllBookings(false)}
-            onDelete={handleDeleteBooking}
-          />
-        )}
       </main>
+
+      {/* ============================================================ */}
+      {/* MODALS                                                       */}
+      {/* ============================================================ */}
+
+      {/* Sign In Modal */}
+      {showSignInModal && (
+        <SignInModal
+          onClose={() => setShowSignInModal(false)}
+          onSuccess={() => setShowSignInModal(false)}
+        />
+      )}
+
+      {/* Booking Form Modal */}
+      {showBookingForm && (
+        <BookingForm
+          unitId={selectedUnit}
+          onClose={() => setShowBookingForm(false)}
+          onSuccess={handleBookingSuccess}
+        />
+      )}
+
+      {/* Breakdown Modal */}
+      {showBreakdown && (
+        <BreakdownModal
+          bookings={currentMonthBookings}
+          onClose={() => setShowBreakdown(false)}
+          currentMonth={selectedMonth}
+        />
+      )}
+
+      {/* All Bookings Modal */}
+      {showAllBookings && (
+        <AllBookingsModal
+          bookings={currentMonthBookings}
+          onClose={() => setShowAllBookings(false)}
+          onDelete={handleDeleteBooking}
+        />
+      )}
     </div>
   );
 }

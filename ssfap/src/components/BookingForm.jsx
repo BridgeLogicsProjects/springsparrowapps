@@ -4,53 +4,72 @@
  * ============================================================================
  * 
  * Component: BookingForm
- * Version: 1.0.0
- * Last Updated: 2026-02-14
+ * Version: 1.2.0 - TAX TRACKING ADDED
+ * Last Updated: 2026-03-10
  * 
  * PURPOSE:
  * Comprehensive booking entry form supporting both STR (short-term rental)
- * and MTR (medium-term rental) modes. Handles all revenue calculations,
- * fees, deposits, and pet policies.
+ * and MTR (medium-term rental) modes with Pierce County tax tracking.
  * 
  * BUSINESS CONTEXT:
- * STR bookings are nightly (Airbnb/Vrbo) with turnover cleaning per stay.
- * MTR bookings are monthly (Furnished Finder) with move-out cleaning, 
- * security deposits, damage protection, and optional pet fees.
+ * STR bookings include 12.5% Pierce County lodging tax (auto-calculated).
+ * MTR bookings have no local tax (long-term rentals exempt).
+ * 
+ * CHANGELOG v1.2.0:
+ * - ADDED: localTax field for STR bookings
+ * - ADDED: Auto-calculate 12.5% Pierce County tax from gross payout
+ * - ADDED: Tax field shown in STR section (read-only, auto-calculated)
+ * - IMPROVED: Tax saved to Firebase for quarterly reporting
  * 
  * ============================================================================
  */
 
 import { useState, useEffect } from 'react';
-import { addBooking, getCurrentMonth } from '../services/firebase/firestoreService';
+import { addBooking, updateBooking, getCurrentMonth } from '../services/firebase/firestoreService';
 
-function BookingForm({ unitId, onClose, onSuccess }) {
+function BookingForm({ unitId, onClose, onSuccess, existingBooking }) {
+  // ========================================================================
+  // DETERMINE MODE: Edit vs Create
+  // ========================================================================
+  
+  const isEditMode = !!existingBooking;
+  const bookingId = existingBooking?.id;
+  
   // ========================================================================
   // STATE MANAGEMENT
   // ========================================================================
   
-  const [bookingType, setBookingType] = useState('STR'); // STR or MTR
+  const [bookingType, setBookingType] = useState(
+    existingBooking?.type || 'STR'
+  );
+  
   const [formData, setFormData] = useState({
     // Common fields
-    unitId: unitId || 'robins-roost',
-    checkIn: '',
-    checkOut: '',
-    platform: 'Airbnb',
-    grossPayout: '',
-    platformFee: '',
+    unitId: existingBooking?.unitId || unitId || 'robins-roost',
+    checkIn: existingBooking?.checkIn 
+      ? new Date(existingBooking.checkIn).toISOString().split('T')[0] 
+      : '',
+    checkOut: existingBooking?.checkOut 
+      ? new Date(existingBooking.checkOut).toISOString().split('T')[0] 
+      : '',
+    platform: existingBooking?.platform || 'Airbnb',
+    grossPayout: existingBooking?.grossPayout?.toString() || '',
+    platformFee: existingBooking?.platformFee?.toString() || '',
     
     // STR-specific
-    cleaningCost: '150', // Default STR cleaning
+    cleaningCost: existingBooking?.cleaningCost?.toString() || '150',
+    localTax: existingBooking?.localTax?.toString() || '', // NEW: Pierce County tax
     
     // MTR-specific
-    baseMonthlyRent: '',
-    moveOutCleaning: '350', // Default MTR cleaning
-    securityDeposit: '',
-    damageProtection: '80', // Default damage protection
-    hasDamageProtection: true,
-    hasPets: false,
-    petCount: '1',
-    petFeePerMonth: '',
-    petDeposit: '250', // Non-refundable
+    baseMonthlyRent: existingBooking?.baseMonthlyRent?.toString() || '',
+    moveOutCleaning: existingBooking?.cleaningCost?.toString() || '350',
+    securityDeposit: existingBooking?.securityDeposit?.toString() || '',
+    damageProtection: existingBooking?.damageProtection?.toString() || '80',
+    hasDamageProtection: existingBooking?.damageProtection > 0 || true,
+    hasPets: existingBooking?.hasPets || false,
+    petCount: existingBooking?.petCount?.toString() || '1',
+    petFeePerMonth: existingBooking?.petFeePerMonth?.toString() || '',
+    petDeposit: existingBooking?.petDeposit?.toString() || '250',
   });
   
   const [calculated, setCalculated] = useState({
@@ -65,6 +84,27 @@ function BookingForm({ unitId, onClose, onSuccess }) {
   const [error, setError] = useState('');
   
   const userId = 'B52ye9yyQ0QINoHdEe4nH5niDef2'; // Hardcoded for now
+  
+  // ========================================================================
+  // AUTO-CALCULATE TAX (12.5% Pierce County for STR)
+  // ========================================================================
+  
+  useEffect(() => {
+    if (bookingType === 'STR' && formData.grossPayout) {
+      const gross = parseFloat(formData.grossPayout) || 0;
+      const taxAmount = (gross * 0.125).toFixed(2);
+      setFormData(prev => ({
+        ...prev,
+        localTax: taxAmount
+      }));
+    } else if (bookingType === 'MTR') {
+      // MTR has no local tax (long-term rental exempt)
+      setFormData(prev => ({
+        ...prev,
+        localTax: '0'
+      }));
+    }
+  }, [formData.grossPayout, bookingType]);
   
   // ========================================================================
   // AUTO-CALCULATIONS (runs whenever dates or amounts change)
@@ -96,6 +136,7 @@ function BookingForm({ unitId, onClose, onSuccess }) {
       displayText = `${diffDays} night${diffDays !== 1 ? 's' : ''}`;
       
       // STR Net Income = Gross - Platform Fee - Cleaning
+      // NOTE: Tax is NOT deducted from net income (it's pass-through to county)
       const gross = parseFloat(grossPayout) || 0;
       const fee = parseFloat(platformFee) || 0;
       const cleaning = parseFloat(formData.cleaningCost) || 0;
@@ -190,6 +231,9 @@ function BookingForm({ unitId, onClose, onSuccess }) {
         netIncome: calculated.netIncome,
         month: getCurrentMonth(),
         
+        // NEW: Add tax for STR bookings (12.5% Pierce County)
+        localTax: bookingType === 'STR' ? parseFloat(formData.localTax) || 0 : 0,
+        
         // MTR-specific fields
         ...(bookingType === 'MTR' && {
           baseMonthlyRent: parseFloat(formData.baseMonthlyRent) || 0,
@@ -202,9 +246,15 @@ function BookingForm({ unitId, onClose, onSuccess }) {
         }),
       };
       
-      await addBooking(userId, bookingData);
-      
-      console.log('Booking saved:', bookingData);
+      if (isEditMode) {
+        // UPDATE existing booking
+        await updateBooking(userId, bookingId, bookingData);
+        console.log('Booking updated:', bookingId, bookingData);
+      } else {
+        // CREATE new booking
+        await addBooking(userId, bookingData);
+        console.log('Booking created:', bookingData);
+      }
       
       if (onSuccess) onSuccess();
       if (onClose) onClose();
@@ -225,7 +275,9 @@ function BookingForm({ unitId, onClose, onSuccess }) {
       <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-neutral-900">Add Booking</h2>
+          <h2 className="text-xl font-bold text-neutral-900">
+            {isEditMode ? 'Edit Booking' : 'Add Booking'}
+          </h2>
           <button
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-600 text-2xl"
@@ -378,6 +430,26 @@ function BookingForm({ unitId, onClose, onSuccess }) {
                 />
               </div>
               
+              {/* NEW: Local STR Tax (Auto-calculated) */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Local STR Tax (12.5% Tacoma)
+                </label>
+                <input
+                  type="number"
+                  name="localTax"
+                  value={formData.localTax}
+                  onChange={handleChange}
+                  step="0.01"
+                  placeholder="56.25"
+                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  readOnly
+                />
+                <p className="text-xs text-neutral-500 mt-1">
+                  💡 Auto-calculated • Remit quarterly to Pierce County
+                </p>
+              </div>
+              
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Cleaning Cost (per turnover)
@@ -417,7 +489,7 @@ function BookingForm({ unitId, onClose, onSuccess }) {
               
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Platform Fee (10% typical)
+                  Platform Fee (if applicable)
                 </label>
                 <input
                   type="number"
@@ -425,10 +497,13 @@ function BookingForm({ unitId, onClose, onSuccess }) {
                   value={formData.platformFee}
                   onChange={handleChange}
                   step="0.01"
-                  placeholder="200.00"
+                  placeholder="0.00"
                   className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   required
                 />
+                <p className="text-xs text-neutral-500 mt-1">
+                  Furnished Finder annual fee goes in OpEx, not here
+                </p>
               </div>
               
               <div>
@@ -543,7 +618,7 @@ function BookingForm({ unitId, onClose, onSuccess }) {
                   
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 mb-2">
-                      Non-Refundable Pet Deposit (one-time)
+                      Pet Move-Out Cleaning Fee (one-time)
                     </label>
                     <input
                       type="number"
@@ -566,6 +641,11 @@ function BookingForm({ unitId, onClose, onSuccess }) {
             <p className="text-2xl font-bold text-success-900">
               ${calculated.netIncome.toFixed(2)}
             </p>
+            {bookingType === 'STR' && formData.localTax && parseFloat(formData.localTax) > 0 && (
+              <p className="text-xs text-success-700 mt-1">
+                + ${parseFloat(formData.localTax).toFixed(2)} tax collected (remit to Pierce County)
+              </p>
+            )}
           </div>
           
           {/* Error Message */}
@@ -589,7 +669,7 @@ function BookingForm({ unitId, onClose, onSuccess }) {
               disabled={loading}
               className="flex-1 px-4 py-3 bg-blue-100 border-2 border-blue-600 text-blue-900 hover:bg-blue-200 disabled:bg-neutral-100 disabled:border-neutral-300 disabled:text-neutral-500 rounded-lg font-medium transition-colors"
             >
-              {loading ? 'Saving...' : 'Save Booking'}
+              {loading ? 'Saving...' : isEditMode ? 'Update Booking' : 'Save Booking'}
             </button>
           </div>
         </form>
