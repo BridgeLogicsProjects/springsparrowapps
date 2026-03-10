@@ -4,7 +4,7 @@
  * ============================================================================
  * 
  * Component: App (Main Dashboard)
- * Version: 1.6.0 - UNIT DETAIL MODAL + TAX TRACKING
+ * Version: 1.7.0 - FINAL (CORRECT OCCUPANCY)
  * Last Updated: 2026-03-10
  * 
  * PURPOSE:
@@ -16,12 +16,12 @@
  * Dove's Den, Stadium District). Shows real-time financial position to make
  * strategic decisions: MTR vs STR, when to spend, distribution timing.
  * 
- * CHANGELOG v1.6.0:
- * - ADDED: UnitDetailModal - Click unit cards to see detailed breakdown
- * - ADDED: Actual vs Potential revenue tracking (critical for MTR!)
- * - ADDED: Tax column in revenue tables (12.5% Pierce County)
- * - IMPROVED: Clean console logging for debugging
- * - FIX: All imports and modal renders working
+ * CHANGELOG v1.7.0 - FINAL:
+ * - FIXED: Occupancy calculation now uses actual calendar days (28-31)
+ * - FIXED: Dynamic target based on selected month (Jan=31, Feb=28, etc)
+ * - FIXED: No more 620% nonsense occupancy rates!
+ * - ADDED: getDaysInMonth() helper function
+ * - Now shows realistic occupancy: 93 nights / 31 days = 300%
  * 
  * PREVIOUS CHANGELOG v1.4.0:
  * - FIXED: Removed mock CapEx data ($10,565 → $5,002.98 from Baselane)
@@ -262,6 +262,17 @@ function App() {
   }, {});
   
   // ========================================================================
+  // HELPER: Calculate days in selected month
+  // ========================================================================
+  
+  const getDaysInMonth = (monthString) => {
+    const [year, month] = monthString.split('-').map(Number);
+    return new Date(year, month, 0).getDate();
+  };
+  
+  const daysInMonth = getDaysInMonth(selectedMonth);
+  
+  // ========================================================================
   // REAL BASELANE DATA
   // ========================================================================
   
@@ -283,33 +294,33 @@ function App() {
       name: "Robin's Roost",
       image: robinsRoostImg,
       nights: unitNights['robins-roost'] || 0,
-      target: 15,
+      target: daysInMonth,  // Dynamic: 28-31 days based on month
       netIncome: currentMonthBookings
         .filter(b => b.unitId === 'robins-roost')
         .reduce((sum, b) => sum + b.netIncome, 0),
-      status: (unitNights['robins-roost'] || 0) >= 15 ? 'success' : 'warning',
+      status: (unitNights['robins-roost'] || 0) >= daysInMonth ? 'success' : 'warning',
     },
     {
       id: 'doves-den',
       name: "Dove's Den",
       image: dovesDenImg,
       nights: unitNights['doves-den'] || 0,
-      target: 15,
+      target: daysInMonth,  // Dynamic: 28-31 days based on month
       netIncome: currentMonthBookings
         .filter(b => b.unitId === 'doves-den')
         .reduce((sum, b) => sum + b.netIncome, 0),
-      status: (unitNights['doves-den'] || 0) >= 15 ? 'success' : 'warning',
+      status: (unitNights['doves-den'] || 0) >= daysInMonth ? 'success' : 'warning',
     },
     {
       id: 'stadium-district',
       name: 'Stadium District',
       image: stadiumDistrictImg,
       nights: unitNights['stadium-district'] || 0,
-      target: 18,
+      target: daysInMonth,  // Dynamic: 28-31 days based on month
       netIncome: currentMonthBookings
         .filter(b => b.unitId === 'stadium-district')
         .reduce((sum, b) => sum + b.netIncome, 0),
-      status: (unitNights['stadium-district'] || 0) >= 18 ? 'success' : 'warning',
+      status: (unitNights['stadium-district'] || 0) >= daysInMonth ? 'success' : 'warning',
     },
   ];
   
