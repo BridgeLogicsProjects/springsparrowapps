@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Sparrow Inventory Checklist</title>
+    <title>Spring Sparrow Inventory System</title>
     <style>
         * {
             margin: 0;
@@ -13,39 +13,62 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f7;
             padding: 20px;
             min-height: 100vh;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
             color: white;
             padding: 30px 20px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
             font-size: 28px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-weight: 700;
         }
 
         .header p {
-            font-size: 15px;
-            line-height: 1.6;
+            font-size: 14px;
             opacity: 0.95;
-            max-width: 600px;
-            margin: 0 auto;
+        }
+
+        .admin-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: white;
+            color: #1fc8c8;
+        }
+
+        .admin-btn.active {
+            background: #ffd700;
+            color: #333;
+            border-color: #ffd700;
         }
 
         .nav-tabs {
@@ -69,8 +92,8 @@
 
         .nav-tab.active {
             background: white;
-            color: #667eea;
-            border-bottom: 3px solid #667eea;
+            color: #1fc8c8;
+            border-bottom: 3px solid #1fc8c8;
         }
 
         .nav-tab:hover {
@@ -85,45 +108,31 @@
             display: block;
         }
 
-        .theft-counter {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .theft-counter.alert {
-            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-        }
-
-        .theft-counter .days {
-            font-size: 48px;
-            font-weight: 800;
-            display: block;
-            margin: 10px 0;
-        }
-
         .form-section {
             padding: 20px;
         }
 
-        .inspection-date {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
             margin-bottom: 20px;
         }
 
-        .inspection-date label {
+        .form-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .form-group label {
             display: block;
             font-weight: 600;
             margin-bottom: 8px;
             color: #333;
         }
 
-        .inspection-date input {
+        .form-group select {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -131,44 +140,175 @@
             font-size: 16px;
         }
 
+        .auto-info {
+            background: #d4f4f4;
+            border-left: 4px solid #1fc8c8;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #0a5858;
+        }
+
+        .admin-mode-banner {
+            background: #ffd700;
+            color: #333;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
         .room-section {
             margin-bottom: 30px;
             border: 2px solid #e9ecef;
             border-radius: 12px;
             overflow: hidden;
+            position: relative;
         }
 
         .room-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
             color: white;
             padding: 15px 20px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .room-header.restock {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
+        .room-header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-section {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: 1px solid white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-section:hover {
+            background: white;
+            color: #1fc8c8;
+        }
+
+        .room-subheader {
+            background: #5dd9d9;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .item-row {
             padding: 15px 20px;
             border-bottom: 1px solid #e9ecef;
             background: white;
-        }
-
-        .item-row:last-child {
-            border-bottom: none;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            position: relative;
         }
 
         .item-row:nth-child(even) {
             background: #f8f9fa;
         }
 
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-admin-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-item-edit {
+            padding: 4px 8px;
+            background: #1fc8c8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .btn-item-delete {
+            padding: 4px 8px;
+            background: #f45c43;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            flex-shrink: 0;
+            background: white;
+        }
+
+        .item-image-placeholder {
+            width: 80px;
+            height: 80px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 11px;
+            text-align: center;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .item-image-placeholder:hover {
+            border-color: #1fc8c8;
+            background: #e8f9f9;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
         .item-name {
             font-weight: 600;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             font-size: 16px;
+        }
+
+        .item-location {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
         }
 
         .controls {
@@ -176,6 +316,7 @@
             gap: 15px;
             flex-wrap: wrap;
             align-items: center;
+            margin-top: 8px;
         }
 
         .radio-group {
@@ -195,6 +336,7 @@
             width: 20px;
             height: 20px;
             cursor: pointer;
+            accent-color: #1fc8c8;
         }
 
         .checkbox-label {
@@ -222,11 +364,9 @@
             margin-top: 10px;
         }
 
-        .restock-controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
+        .notes-input:focus {
+            outline: none;
+            border-color: #1fc8c8;
         }
 
         .stock-level {
@@ -261,22 +401,6 @@
             color: #d9534f;
         }
 
-        .restock-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .restock-checkbox input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
         .quantity-input {
             width: 80px;
             padding: 8px;
@@ -286,18 +410,63 @@
             text-align: center;
         }
 
-        .signature-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-top: 3px solid #667eea;
+        .add-section-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 20px 0;
         }
 
-        .signature-section h3 {
-            margin-bottom: 15px;
-            color: #333;
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
         }
 
-        .signature-input {
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .access-denied {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .access-form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .access-form h2 {
+            color: #1fc8c8;
+            margin-bottom: 20px;
+        }
+
+        .access-form input {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -306,214 +475,58 @@
             margin-bottom: 15px;
         }
 
-        .submit-btn {
+        .access-form button {
             width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px;
+            background: #1fc8c8;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .submit-btn .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto;
-        }
-
-        .submit-btn.loading .spinner {
-            display: block;
-        }
-
-        .submit-btn.loading .btn-text {
-            display: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .summary {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none;
-        }
-
-        .summary.show {
-            display: block;
-        }
-
-        .summary h3 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-
-        .summary-stat {
             font-size: 16px;
-            color: #856404;
-            margin: 5px 0;
-        }
-
-        .calendar-container {
-            padding: 20px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .calendar-header h2 {
-            color: #333;
-            font-size: 24px;
-        }
-
-        .calendar-nav {
-            display: flex;
-            gap: 10px;
-        }
-
-        .calendar-nav button {
-            padding: 8px 16px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
             font-weight: 600;
-        }
-
-        .calendar-nav button:hover {
-            background: #5568d3;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-bottom: 30px;
-        }
-
-        .calendar-day-header {
-            text-align: center;
-            padding: 10px;
-            font-weight: 700;
-            color: #667eea;
-            font-size: 14px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            background: white;
         }
 
-        .calendar-day:hover {
-            border-color: #667eea;
-            transform: scale(1.05);
-        }
-
-        .calendar-day.other-month {
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        .calendar-day.has-report {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 700;
-        }
-
-        .calendar-day.has-issues {
-            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-            color: white;
-            font-weight: 700;
-        }
-
-        .calendar-day-number {
-            font-size: 16px;
-        }
-
-        .calendar-day-badge {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 8px;
-            height: 8px;
-            background: #f45c43;
-            border-radius: 50%;
-        }
-
+        /* REPORTS STYLES */
         .reports-container {
             padding: 20px;
         }
 
         .reports-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 20px;
         }
 
         .reports-header h2 {
-            color: #333;
-            font-size: 24px;
+            color: #1fc8c8;
+            margin-bottom: 15px;
         }
 
-        .filter-buttons {
+        .reports-filters {
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
-        .filter-btn {
-            padding: 8px 16px;
-            background: #e9ecef;
-            color: #333;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
         }
 
-        .filter-btn.active {
-            background: #667eea;
-            color: white;
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
         }
 
         .report-card {
@@ -527,8 +540,8 @@
         }
 
         .report-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            border-color: #1fc8c8;
+            box-shadow: 0 4px 12px rgba(31, 200, 200, 0.2);
         }
 
         .report-card.has-issues {
@@ -538,95 +551,133 @@
         .report-card-header {
             display: flex;
             justify-content: space-between;
-            align-items: start;
+            align-items: center;
             margin-bottom: 15px;
         }
 
-        .report-date {
-            font-size: 20px;
+        .report-card-title {
+            font-size: 18px;
             font-weight: 700;
             color: #333;
         }
 
-        .report-status {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
+        .report-card-date {
+            font-size: 14px;
+            color: #666;
         }
 
-        .report-status.clean {
+        .report-card-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .report-info-item {
+            font-size: 14px;
+        }
+
+        .report-info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .report-status {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
             background: #d4edda;
             color: #155724;
         }
 
-        .report-status.issues {
+        .status-badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.danger {
             background: #f8d7da;
             color: #721c24;
         }
 
-        .report-inspector {
-            color: #666;
-            margin-bottom: 10px;
-            font-size: 14px;
+        .report-details {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
         }
 
-        .report-summary {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
+        .report-details.show {
+            display: block;
         }
 
-        .report-stat {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-
-        .report-stat.missing {
-            color: #d9534f;
-            font-weight: 600;
-        }
-
-        .report-stat.damaged {
-            color: #f0ad4e;
-            font-weight: 600;
-        }
-
-        .report-stat.clean {
-            color: #5cb85c;
-            font-weight: 600;
-        }
-
-        .report-stat.restock {
-            color: #f5576c;
-            font-weight: 600;
-        }
-
-        .no-reports {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .no-reports-icon {
-            font-size: 64px;
+        .report-details-section {
             margin-bottom: 20px;
         }
 
+        .report-details-section h4 {
+            color: #1fc8c8;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .report-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .report-item.issue {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .report-item.critical {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .report-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .report-item-details {
+            font-size: 13px;
+            color: #666;
+        }
+
         .export-btn {
-            padding: 8px 16px;
+            padding: 10px 20px;
             background: #5cb85c;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
+            margin-top: 10px;
         }
 
-        .export-btn:hover {
-            background: #4cae4c;
+        .no-reports {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-reports-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
         }
 
         .modal {
@@ -638,20 +689,19 @@
             height: 100%;
             background: rgba(0,0,0,0.7);
             z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .modal.show {
-            display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
 
+        .modal.show {
+            display: flex;
+        }
+
         .modal-content {
             background: white;
             border-radius: 16px;
-            max-width: 700px;
+            max-width: 600px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -659,7 +709,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
             color: white;
             padding: 20px;
             border-radius: 16px 16px 0 0;
@@ -669,14 +719,14 @@
         }
 
         .modal-header h2 {
-            font-size: 24px;
+            font-size: 20px;
         }
 
         .close-modal {
             background: none;
             border: none;
             color: white;
-            font-size: 32px;
+            font-size: 28px;
             cursor: pointer;
             line-height: 1;
         }
@@ -685,64 +735,67 @@
             padding: 20px;
         }
 
-        .detail-section {
-            margin-bottom: 25px;
-        }
-
-        .detail-section h3 {
-            color: #667eea;
+        .modal-field {
             margin-bottom: 15px;
-            font-size: 18px;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 10px;
         }
 
-        .detail-item {
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-
-        .detail-item strong {
+        .modal-field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
             color: #333;
         }
 
-        .email-notice {
-            background: #d1ecf1;
-            border-left: 4px solid #0c5460;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 4px;
+        .modal-field input,
+        .modal-field select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
             font-size: 14px;
-            color: #0c5460;
         }
 
-        @media (max-width: 600px) {
+        .modal-footer {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-save {
+            padding: 10px 20px;
+            background: #1fc8c8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
             .controls {
                 flex-direction: column;
                 align-items: flex-start;
-            }
-            
-            .calendar-grid {
-                gap: 2px;
-            }
-            
-            .calendar-day {
-                font-size: 12px;
-            }
-            
-            .filter-buttons {
-                width: 100%;
-            }
-            
-            .filter-btn {
-                flex: 1;
             }
 
             .stock-level {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .reports-filters {
+                flex-direction: column;
             }
         }
     </style>
@@ -750,1229 +803,1377 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏠 Spring Sparrow Inventory Checklist</h1>
-            <p>Protecting our properties and preventing losses starts with accurate documentation. Please thoroughly inspect each item during turnover and report any missing or damaged property. Your diligence helps us maintain quality standards and address issues promptly.</p>
+            <h1>ðŸ¦ Spring Sparrow Inventory System</h1>
+            <p>Property Management & Turnover Tracking</p>
+            <button class="admin-btn" id="adminToggle" onclick="toggleAdminMode()">âš™ï¸ Admin</button>
         </div>
 
-        <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('checklist')">📋 New Checklist</button>
-            <button class="nav-tab" onclick="switchTab('calendar')">📅 Calendar</button>
-            <button class="nav-tab" onclick="switchTab('reports')">📊 Reports</button>
+        <div id="accessCheck" class="access-denied">
+            <div class="access-form">
+                <h2>ðŸ” Access Code Required</h2>
+                <p style="margin-bottom: 20px; color: #666;">Enter your access code to continue</p>
+                <input type="password" id="accessCodeInput" placeholder="Enter access code">
+                <button type="button" onclick="checkAccess()">Enter</button>
+            </div>
         </div>
 
-        <div id="checklist-tab" class="tab-content active">
-            <div class="theft-counter" id="theftCounter">
-                <span class="days" id="daysSinceTheft">0</span>
-                Days Without Theft
+        <div id="mainApp" style="display: none;">
+            <div class="nav-tabs" id="navTabs">
+                <button class="nav-tab active" onclick="switchTab('checklist')">ðŸ“‹ New Inspection</button>
+                <button class="nav-tab" onclick="switchTab('reports')">ðŸ“Š Reports</button>
             </div>
 
-            <div class="form-section">
-                <div class="email-notice">
-                    📧 Reports will be automatically emailed to: keeya@springsparrowhousing.com
-                </div>
-
-                <div class="inspection-date">
-                    <label for="inspectionDate">Inspection Date:</label>
-                    <input type="date" id="inspectionDate" required>
-                </div>
-
-                <form id="inventoryForm">
-                    <div class="room-section">
-                        <div class="room-section">
-    <div class="room-header">📱 Electronics & Appliances</div>
-
-    <!-- BEDROOM -->
-    <h4>🛏️ Bedroom</h4>
-
-    <div class="item-row">
-        <div class="item-name">Rectangle Sound Sleeping Noise Wood Machine</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item1" value="yes" required> Yes</label>
-                <label><input type="radio" name="item1" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item1_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item1_notes" placeholder="Notes (optional)">
-    </div>
-
-    <!-- LIVING ROOM -->
-    <h4>🛋️ Living Room</h4>
-
-    <div class="item-row">
-        <div class="item-name">Dreo Cylinder Heater</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item2" value="yes" required> Yes</label>
-                <label><input type="radio" name="item2" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item2_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item2_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">Roku Device & Remote (Behind TV)</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item3" value="yes" required> Yes</label>
-                <label><input type="radio" name="item3" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item3_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item3_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">Samsung TV Remote</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item4" value="yes" required> Yes</label>
-                <label><input type="radio" name="item4" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item4_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item4_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">Electric Blanket</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item5" value="yes" required> Yes</label>
-                <label><input type="radio" name="item5" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item5_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item5_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">DREO Radiator Heater (1 ft from curtains)</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item6" value="yes" required> Yes</label>
-                <label><input type="radio" name="item6" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item6_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item6_notes" placeholder="Notes (optional)">
-    </div>
-
-    <!-- BATHROOM -->
-    <h4>🚿 Bathroom</h4>
-
-    <div class="item-row">
-        <div class="item-name">Hair Dryer</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item7" value="yes" required> Yes</label>
-                <label><input type="radio" name="item7" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item7_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item7_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">Towel Warmer</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item8" value="yes" required> Yes</label>
-                <label><input type="radio" name="item8" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item8_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item8_notes" placeholder="Notes (optional)">
-    </div>
-
-    <!-- KITCHEN -->
-    <h4>🍽️ Kitchen</h4>
-
-    <div class="item-row">
-        <div class="item-name">Alexa Speaker</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item9" value="yes" required> Yes</label>
-                <label><input type="radio" name="item9" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item9_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item9_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">DB Noise Level Monitor</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item10" value="yes" required> Yes</label>
-                <label><input type="radio" name="item10" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item10_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item10_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">Nespresso / Keurig Coffee Maker</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item11" value="yes" required> Yes</label>
-                <label><input type="radio" name="item11" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item11_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item11_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">Electrical Voltage Converter (EU Coffee Maker)</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item12" value="yes" required> Yes</label>
-                <label><input type="radio" name="item12" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item12_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item12_notes" placeholder="Notes (optional)">
-    </div>
-
-    <div class="item-row">
-        <div class="item-name">Microwave</div>
-        <div class="controls">
-            <div class="radio-group">
-                <label><input type="radio" name="item13" value="yes" required> Yes</label>
-                <label><input type="radio" name="item13" value="no"> No</label>
-            </div>
-            <label><input type="checkbox" name="item13_damage"> Damaged</label>
-        </div>
-        <input type="text" name="item13_notes" placeholder="Notes (optional)">
-    </div>
-
-</div>
-
-                    <div class="room-section">
-                        <div class="room-header">🍳 Kitchen Dining and Cooking Items</div>
-                        <div class="item-row">
-                            <div class="item-name">Dishes Plate Count (All Present)</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item13" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item13" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item13_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item13_notes" placeholder="Notes (e.g., missing count)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Glasses Count (All Present)</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item14" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item14" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item14_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item14_notes" placeholder="Notes (e.g., missing count)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Silverware (All Present)</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item15" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item15" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item15_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item15_notes" placeholder="Notes (e.g., missing count)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Pots and Pans</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item16" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item16" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item16_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item16_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Stove Razor Scraper Tool</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item17" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item17" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item17_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item17_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Kitchen Trash Bags</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item18" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item18" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item18_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item18_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Kitchen Dishwasher Pods</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item19" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item19" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item19_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item19_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Kitchen Cooking Gloves</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item20" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item20" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item20_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item20_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Kitchen Cooking Hand Towels</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item21" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item21" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item21_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item21_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Soap and Dish Dispenser</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item22" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item22" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item22_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item22_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Kitchen Cooking Utensils</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item23" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item23" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item23_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item23_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Kitchen Colander / Pasta Drainer</div>
-                            <div class="controls">
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input type="radio" name="item24" value="yes" required> Yes
-                                    </label>
-                                    <label class="radio-label">
-                                        <input type="radio" name="item24" value="no"> No
-                                    </label>
-                                </div>
-                                <label class="checkbox-label">
-                                    <input type="checkbox" name="item24_damage"> Damaged
-                                </label>
-                            </div>
-                            <input type="text" class="notes-input" name="item24_notes" placeholder="Notes (optional)">
-                        </div>
+            <!-- CHECKLIST TAB -->
+            <div id="checklist-tab" class="tab-content active">
+                <div class="form-section">
+                    <div id="adminBanner" class="admin-mode-banner" style="display: none;">
+                        ðŸ”§ ADMIN MODE ACTIVE - You can edit sections and items
                     </div>
 
-                    <div class="room-section">
-                        <div class="room-header restock">🧴 Restocking - Bathroom Essentials</div>
-                        
-                        <div class="item-row">
-                            <div class="item-name">Shampoo</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock1" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock1" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock1" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock1_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock1_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock1_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Conditioner</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock2" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock2" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock2" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock2_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock2_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock2_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Body Wash / Soap</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock3" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock3" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock3" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock3_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock3_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock3_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Hand Soap</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock4" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock4" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock4" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock4_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock4_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock4_notes" placeholder="Notes (optional)">
-                        </div>
+                    <div class="auto-info">
+                        ðŸ“… <strong>Today's Date:</strong> <span id="currentDate"></span><br>
+                        ðŸ‘¥ <strong>Inspector:</strong> Vita Professional Cleaning Crew
                     </div>
 
-                    <div class="room-section">
-                        <div class="room-header restock">🧽 Restocking - Kitchen Essentials</div>
-                        
-                        <div class="item-row">
-                            <div class="item-name">Dishwasher Pods</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock5" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock5" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock5" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock5_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock5_qty" placeholder="Qty" min="0">
+                    <form id="inventoryForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="unitLocation">Unit Location:</label>
+                                <select id="unitLocation" required onchange="loadInventoryForUnit()">
+                                    <option value="">Select Unit...</option>
+                                </select>
                             </div>
-                            <input type="text" class="notes-input" name="restock5_notes" placeholder="Notes (optional)">
                         </div>
 
-                        <div class="item-row">
-                            <div class="item-name">Dish Soap / Detergent</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock6" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock6" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock6" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock6_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock6_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock6_notes" placeholder="Notes (optional)">
+                        <div id="inventoryItems">
+                            <p style="text-align: center; padding: 40px; color: #666;">Please select a unit to view inventory</p>
                         </div>
 
-                        <div class="item-row">
-                            <div class="item-name">Hand Washing Soap</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock7" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock7" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock7" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock7_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock7_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock7_notes" placeholder="Notes (optional)">
-                        </div>
-                    </div>
-
-                    <div class="room-section">
-                        <div class="room-header restock">🍷 Restocking - Guest Amenities</div>
-                        
-                        <div class="item-row">
-                            <div class="item-name">Wine (Welcome Bottle)</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock8" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock8" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock8" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock8_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock8_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock8_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Water Bottles</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock9" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock9" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock9" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock9_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock9_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock9_notes" placeholder="Notes (optional)">
-                        </div>
-
-                        <div class="item-row">
-                            <div class="item-name">Guest Snacks</div>
-                            <div class="restock-controls">
-                                <div class="stock-level">
-                                    <label class="stock-option full">
-                                        <input type="radio" name="restock10" value="full" required> Full Stock
-                                    </label>
-                                    <label class="stock-option low">
-                                        <input type="radio" name="restock10" value="low"> Low Stock
-                                    </label>
-                                    <label class="stock-option empty">
-                                        <input type="radio" name="restock10" value="empty"> Empty/Missing
-                                    </label>
-                                </div>
-                                <label class="restock-checkbox">
-                                    <input type="checkbox" name="restock10_needed"> Needs Restock
-                                </label>
-                                <input type="number" class="quantity-input" name="restock10_qty" placeholder="Qty" min="0">
-                            </div>
-                            <input type="text" class="notes-input" name="restock10_notes" placeholder="Notes (optional)">
-                        </div>
-                    </div>
-
-                    <div class="summary" id="summary"></div>
-
-                    <div class="signature-section">
-                        <h3>Signature & Submission</h3>
-                        <input type="text" class="signature-input" id="inspectorName" placeholder="Full Name" required>
-                        <button type="submit" class="submit-btn" id="submitBtn">
-                            <span class="btn-text">📧 Submit & Email Report</span>
-                            <div class="spinner"></div>
+                        <button type="button" id="addSectionBtn" class="add-section-btn" style="display: none;" onclick="addNewSection()">
+                            âž• Add New Section
                         </button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <div id="calendar-tab" class="tab-content">
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <h2 id="calendarMonthYear"></h2>
-                    <div class="calendar-nav">
-                        <button onclick="changeMonth(-1)">← Prev</button>
-                        <button onclick="changeMonth(0)">Today</button>
-                        <button onclick="changeMonth(1)">Next →</button>
+                        
+                        <!-- PHOTO BUCKET TRIGGER -->
+                        <div id="photoBucketTrigger" style="display:none; margin:20px 0;">
+                            <button type="button" onclick="openPhotoBucket()" style="
+                                width:100%; padding:16px;
+                                background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);
+                                color:white; border:none; border-radius:12px;
+                                font-size:17px; font-weight:800; cursor:pointer;
+                                box-shadow:0 6px 0 #0d7a7a, 0 8px 16px rgba(0,0,0,0.25);
+                                letter-spacing:0.3px; text-shadow:0 1px 2px rgba(0,0,0,0.2);
+                                display:flex; flex-direction:column; align-items:center; gap:4px;
+                            ">
+                                <span>📸 Before &amp; After Evidence</span>
+                                <span style="font-size:13px; font-weight:600; opacity:0.85;" id="photoBucketCount">Tap to add photos &amp; videos</span>
+                            </button>
+                        </div>
+
+<button type="submit" class="submit-btn">ðŸ“§ Submit Report</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- REPORTS TAB -->
+            <div id="reports-tab" class="tab-content">
+                <div class="reports-container">
+                    <div class="reports-header">
+                        <h2>ðŸ“Š Inspection Reports</h2>
+                        
+                        <div class="reports-filters">
+                            <div class="filter-group">
+                                <label>Filter by Unit:</label>
+                                <select id="filterUnit" onchange="filterReports()">
+                                    <option value="">All Units</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Filter by Date:</label>
+                                <input type="date" id="filterDate" onchange="filterReports()">
+                            </div>
+                            <div class="filter-group">
+                                <label>Show:</label>
+                                <select id="filterStatus" onchange="filterReports()">
+                                    <option value="all">All Reports</option>
+                                    <option value="issues">Issues Only</option>
+                                    <option value="clean">Clean Reports</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reportsList">
+                        <div class="loading">Loading reports...</div>
                     </div>
                 </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
-            </div>
-        </div>
-
-        <div id="reports-tab" class="tab-content">
-            <div class="reports-container">
-                <div class="reports-header">
-                    <h2>All Reports</h2>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" onclick="filterReports('all')">All</button>
-                        <button class="filter-btn" onclick="filterReports('clean')">Clean</button>
-                        <button class="filter-btn" onclick="filterReports('issues')">Issues</button>
-                        <button class="export-btn" onclick="exportReports()">📥 Export CSV</button>
-                    </div>
-                </div>
-                <div id="reportsList"></div>
             </div>
         </div>
     </div>
 
-    <div id="reportModal" class="modal">
+    <!-- Edit Item Modal -->
+    <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Report Details</h2>
+                <h2 id="modalTitle">Edit Item</h2>
                 <button class="close-modal" onclick="closeModal()">&times;</button>
             </div>
-            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>Item Name:</label>
+                    <input type="text" id="editItemName">
+                </div>
+                <div class="modal-field">
+                    <label>Location:</label>
+                    <input type="text" id="editItemLocation" placeholder="e.g., Kitchen Counter">
+                </div>
+                <div class="modal-field">
+                    <label>Amazon Image URL:</label>
+                    <input type="text" id="editItemImageUrl" placeholder="https://m.media-amazon.com/...">
+                    <small style="color: #666; font-size: 12px;">Paste Amazon product image URL</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveItemEdit()">Save Changes</button>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script>
-        // Add this at the top of your <script> section
-const correctPassword = "vita3046"; // Change this!
-const userPassword = prompt("Enter access code:");
-if (userPassword !== correctPassword) {
-    document.body.innerHTML = "<h1>Access Denied</h1>";
-    throw new Error("Access denied");
-}
-    </script>
-    <script>
-        const itemNames = {
-            item1: { name: "Dreo Cylinder Heater", room: "Electronics" },
-            item2: { name: "Alexa Speaker - Kitchen", room: "Electronics" },
-            item3: { name: "Noise Monitor - Kitchen", room: "Electronics" },
-            item4: { name: "Rectangle Sound Noise Wood Machine - Bedroom", room: "Electronics" },
-            item5: { name: "Samsung TV Roku Device", room: "Electronics" },
-            item6: { name: "Towel Warmer - Bathroom", room: "Electronics" },
-            item7: { name: "Electric Blanket", room: "Electronics" },
-            item8: { name: "Hair Dryer - Bathroom", room: "Electronics" },
-            item9: { name: "DREO Radiator Heater - Living Room", room: "Electronics" },
-            item10: { name: "Nespresso/Keurig Coffee Maker", room: "Electronics" },
-            item11: { name: "Electrical Voltage Converter (EU Coffee Maker)", room: "Electronics" },
-            item12: { name: "Microwave", room: "Electronics" },
-            item13: { name: "Dishes Plate Count (All Present)", room: "Kitchen" },
-            item14: { name: "Glasses Count (All Present)", room: "Kitchen" },
-            item15: { name: "Silverware (All Present)", room: "Kitchen" },
-            item16: { name: "Pots and Pans", room: "Kitchen" },
-            item17: { name: "Stove Razor Scraper Tool", room: "Kitchen" },
-            item18: { name: "Kitchen Trash Bags", room: "Kitchen" },
-            item19: { name: "Kitchen Dishwasher Pods", room: "Kitchen" },
-            item20: { name: "Kitchen Cooking Gloves", room: "Kitchen" },
-            item21: { name: "Kitchen Cooking Hand Towels", room: "Kitchen" },
-            item22: { name: "Soap and Dish Dispenser", room: "Kitchen" },
-            item23: { name: "Kitchen Cooking Utensils", room: "Kitchen" },
-            item24: { name: "Kitchen Colander / Pasta Drainer", room: "Kitchen" }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6W83NZRYljB8YrLHGRvDtDBoU_vCBao0",
+            authDomain: "spring-sparrow-apps.firebaseapp.com",
+            projectId: "spring-sparrow-apps",
+            storageBucket: "spring-sparrow-apps.firebasestorage.app",
+            messagingSenderId: "1053519751459",
+            appId: "1:1053519751459:web:6f88326ed5dd73a3280496",
+            measurementId: "G-V34EMQEN8H"
         };
 
-        const restockItems = {
-            restock1: { name: "Shampoo", room: "Bathroom Essentials" },
-            restock2: { name: "Conditioner", room: "Bathroom Essentials" },
-            restock3: { name: "Body Wash / Soap", room: "Bathroom Essentials" },
-            restock4: { name: "Hand Soap", room: "Bathroom Essentials" },
-            restock5: { name: "Dishwasher Pods", room: "Kitchen Essentials" },
-            restock6: { name: "Dish Soap / Detergent", room: "Kitchen Essentials" },
-            restock7: { name: "Hand Washing Soap", room: "Kitchen Essentials" },
-            restock8: { name: "Wine (Welcome Bottle)", room: "Guest Amenities" },
-            restock9: { name: "Water Bottles", room: "Guest Amenities" },
-            restock10: { name: "Guest Snacks", room: "Guest Amenities" }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        window.db = db;
+        window.storage = storage;
+        window.sessionPairs = [];
+        window.pairCounter = 0;
+        window.isAdmin = false;
+        window.adminModeActive = false;
+        window.currentUnits = [];
+        window.currentInventory = {};
+        window.editingItem = null;
+        window.allReports = [];
+
+        const today = new Date();
+        document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        window.checkAccess = async function() {
+            const code = document.getElementById('accessCodeInput').value;
+            if (code === 'Vita3046' || code === '2008') {
+                if (code === '2008') {
+                    window.isAdmin = true;
+                }
+                document.getElementById('accessCheck').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                await loadUnits();
+            } else {
+                alert('❌ Invalid access code');
+            }
         };
 
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let currentFilter = 'all';
+        document.getElementById('accessCodeInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAccess();
+        });
 
-        document.getElementById('inspectionDate').valueAsDate = new Date();
+        async function loadUnits() {
+            const unitsSnapshot = await getDocs(collection(db, 'units'));
+            window.currentUnits = [];
+            unitsSnapshot.forEach(doc => {
+                window.currentUnits.push({ id: doc.id, ...doc.data() });
+            });
 
-        function switchTab(tabName) {
+            if (window.currentUnits.length === 0) {
+                const defaultUnits = [
+                    { name: "Robin's Roost - 1617 Sheridan - Unit A" },
+                    { name: "Dove's Den - 1617 Sheridan - Unit B" },
+                    { name: "Orion Apartments - 29 St. Helens, Unit #305" }
+                ];
+                
+                for (const unit of defaultUnits) {
+                    const docRef = await addDoc(collection(db, 'units'), unit);
+                    window.currentUnits.push({ id: docRef.id, ...unit });
+                }
+            }
+
+            renderUnitDropdown();
+            populateFilterDropdowns();
+        }
+
+        function renderUnitDropdown() {
+            const select = document.getElementById('unitLocation');
+            select.innerHTML = '<option value="">Select Unit...</option>';
+            window.currentUnits.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = unit.name;
+                select.appendChild(option);
+            });
+        }
+
+        function populateFilterDropdowns() {
+            const filterUnit = document.getElementById('filterUnit');
+            filterUnit.innerHTML = '<option value="">All Units</option>';
+            window.currentUnits.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = unit.name;
+                filterUnit.appendChild(option);
+            });
+        }
+
+        window.loadInventoryForUnit = async function() {
+            const unitId = document.getElementById('unitLocation').value;
+            if (!unitId) {
+                document.getElementById('inventoryItems').innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">Please select a unit to view inventory</p>';
+                return;
+            }
+
+            document.getElementById('inventoryItems').innerHTML = '<div class="loading">Loading inventory...</div>';
+
+            const docRef = doc(db, 'inventory', unitId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                window.currentInventory = docSnap.data();
+            } else {
+                window.currentInventory = getDefaultInventory();
+                await setDoc(docRef, window.currentInventory);
+            }
+
+            renderInventory();
+            document.getElementById('photoBucketTrigger').style.display = 'block';
+            window.sessionPairs = [];
+            window.pairCounter = 0;
+            document.getElementById('evidencePairs').innerHTML = '';
+            document.getElementById('generalNotes').value = '';
+        };
+
+        function getDefaultInventory() {
+            return {
+                sections: [
+                    {
+                        id: 'electronics',
+                        name: 'ðŸ“± Electronics and Appliances',
+                        type: 'checklist',
+                        rooms: [
+                            {
+                                name: 'Kitchen',
+                                items: [
+                                    { id: 'alexa', name: 'Alexa Speaker', location: 'Kitchen Counter', imageUrl: '' },
+                                    { id: 'noise_monitor', name: 'Noise Monitor', location: 'Kitchen Wall', imageUrl: '' },
+                                    { id: 'coffee_maker', name: 'Nespresso/Keurig Coffee Maker', location: 'Kitchen Counter', imageUrl: '' },
+                                    { id: 'microwave', name: 'Microwave', location: 'Kitchen Counter', imageUrl: '' }
+                                ]
+                            },
+                            {
+                                name: 'Living Room',
+                                items: [
+                                    { id: 'tv_roku', name: 'Samsung TV Roku Device', location: 'TV Stand', imageUrl: '' },
+                                    { id: 'radiator_heater', name: 'DREO Radiator Heater', location: 'Living Room Corner', imageUrl: '' },
+                                    { id: 'cylinder_heater', name: 'Dreo Cylinder Heater', location: 'Living Room', imageUrl: '' }
+                                ]
+                            },
+                            {
+                                name: 'Bedroom',
+                                items: [
+                                    { id: 'sound_machine', name: 'Rectangle Sound Noise Wood Machine', location: 'Nightstand', imageUrl: '' },
+                                    { id: 'electric_blanket', name: 'Electric Blanket', location: 'Bedroom Closet', imageUrl: '' }
+                                ]
+                            },
+                            {
+                                name: 'Bathroom',
+                                items: [
+                                    { id: 'towel_warmer', name: 'Towel Warmer', location: 'Bathroom Wall', imageUrl: '' },
+                                    { id: 'hair_dryer', name: 'Hair Dryer', location: 'Under Sink', imageUrl: '' },
+                                    { id: 'voltage_converter', name: 'Electrical Voltage Converter', location: 'Bathroom Cabinet', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'kitchen_dining',
+                        name: 'ðŸ³ Kitchen & Dining Essentials',
+                        type: 'checklist',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'dishes', name: 'Dishes Plate Count (All Present)', location: '', imageUrl: '' },
+                                    { id: 'glasses', name: 'Glasses Count (All Present)', location: '', imageUrl: '' },
+                                    { id: 'silverware', name: 'Silverware (All Present)', location: '', imageUrl: '' },
+                                    { id: 'pots_pans', name: 'Pots and Pans', location: '', imageUrl: '' },
+                                    { id: 'scraper', name: 'Stove Razor Scraper Tool', location: '', imageUrl: '' },
+                                    { id: 'trash_bags', name: 'Kitchen Trash Bags', location: '', imageUrl: '' },
+                                    { id: 'cooking_gloves', name: 'Kitchen Cooking Gloves', location: '', imageUrl: '' },
+                                    { id: 'hand_towels_kitchen', name: 'Kitchen Cooking Hand Towels', location: '', imageUrl: '' },
+                                    { id: 'soap_dispenser', name: 'Soap and Dish Dispenser', location: '', imageUrl: '' },
+                                    { id: 'cooking_utensils', name: 'Kitchen Cooking Utensils', location: '', imageUrl: '' },
+                                    { id: 'colander', name: 'Kitchen Colander / Pasta Drainer', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bedroom_essentials',
+                        name: 'ðŸ›ï¸ Bedroom Essentials - Linens',
+                        type: 'checklist',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'sheets', name: 'Bed Sheets Set', location: '', imageUrl: '' },
+                                    { id: 'pillows', name: 'Pillows', location: '', imageUrl: '' },
+                                    { id: 'pillowcases', name: 'Pillowcases', location: '', imageUrl: '' },
+                                    { id: 'duvet', name: 'Duvet/Comforter', location: '', imageUrl: '' },
+                                    { id: 'blankets', name: 'Blankets (Extra)', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bathroom_essentials',
+                        name: 'ðŸ› Bathroom Essentials',
+                        type: 'checklist',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'bath_towels', name: 'Bath Towels', location: '', imageUrl: '' },
+                                    { id: 'hand_towels_bath', name: 'Hand Towels', location: '', imageUrl: '' },
+                                    { id: 'washcloths', name: 'Washcloths', location: '', imageUrl: '' },
+                                    { id: 'bath_mat', name: 'Bath Mat', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'restock_bathroom',
+                        name: 'ðŸ§´ Restocking - Bathroom Essentials',
+                        type: 'restock',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'shampoo', name: 'Shampoo', location: '', imageUrl: '' },
+                                    { id: 'conditioner', name: 'Conditioner', location: '', imageUrl: '' },
+                                    { id: 'body_wash', name: 'Body Wash / Soap', location: '', imageUrl: '' },
+                                    { id: 'hand_soap_bath', name: 'Hand Soap', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'restock_kitchen',
+                        name: 'ðŸ§½ Restocking - Kitchen Essentials',
+                        type: 'restock',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'dishwasher_pods', name: 'Dishwasher Pods', location: '', imageUrl: '' },
+                                    { id: 'dish_soap', name: 'Dish Soap / Detergent', location: '', imageUrl: '' },
+                                    { id: 'hand_soap_kitchen', name: 'Hand Washing Soap', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'restock_amenities',
+                        name: 'ðŸ· Restocking - Guest Amenities',
+                        type: 'restock',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'wine', name: 'Wine (Welcome Bottle)', location: '', imageUrl: '' },
+                                    { id: 'water_bottles', name: 'Water Bottles', location: '', imageUrl: '' },
+                                    { id: 'guest_snacks', name: 'Guest Snacks', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('inventoryItems');
+            container.innerHTML = '';
+
+            if (!window.currentInventory.sections || window.currentInventory.sections.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No inventory sections found</p>';
+                return;
+            }
+
+            window.currentInventory.sections.forEach((section, sectionIdx) => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'room-section';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = `room-header ${section.type === 'restock' ? 'restock' : ''}`;
+                
+                const headerText = document.createElement('span');
+                headerText.textContent = section.name;
+                headerDiv.appendChild(headerText);
+
+                if (window.adminModeActive) {
+                    const buttonsDiv = document.createElement('div');
+                    buttonsDiv.className = 'room-header-buttons';
+                    buttonsDiv.innerHTML = `
+                        <button class="btn-section" type="button" onclick="event.preventDefault(); addRoom(${sectionIdx})">âž• Room</button>
+                        <button class="btn-section" type="button" onclick="event.preventDefault(); deleteSection(${sectionIdx})">ðŸ—‘ï¸</button>
+                    `;
+                    headerDiv.appendChild(buttonsDiv);
+                }
+
+                sectionDiv.appendChild(headerDiv);
+
+                section.rooms?.forEach((room, roomIdx) => {
+                    if (section.rooms.length > 1 || room.name !== 'All Items') {
+                        const roomHeaderDiv = document.createElement('div');
+                        roomHeaderDiv.className = 'room-subheader';
+                        
+                        const roomText = document.createElement('span');
+                        roomText.textContent = room.name;
+                        roomHeaderDiv.appendChild(roomText);
+
+                        if (window.adminModeActive) {
+                            const roomButtons = document.createElement('div');
+                            roomButtons.className = 'room-header-buttons';
+                            roomButtons.innerHTML = `
+                                <button class="btn-section" type="button" onclick="event.preventDefault(); addItem(${sectionIdx}, ${roomIdx})">âž• Item</button>
+                                <button class="btn-section" type="button" onclick="event.preventDefault(); deleteRoom(${sectionIdx}, ${roomIdx})">ðŸ—‘ï¸</button>
+                            `;
+                            roomHeaderDiv.appendChild(roomButtons);
+                        }
+
+                        sectionDiv.appendChild(roomHeaderDiv);
+                    } else if (window.adminModeActive) {
+                        const addItemDiv = document.createElement('div');
+                        addItemDiv.style.padding = '10px 20px';
+                        addItemDiv.style.background = '#f8f9fa';
+                        addItemDiv.innerHTML = `<button class="btn-section" type="button" onclick="event.preventDefault(); addItem(${sectionIdx}, ${roomIdx})" style="background: #5cb85c; color: white;">âž• Add Item to ${section.name}</button>`;
+                        sectionDiv.appendChild(addItemDiv);
+                    }
+
+                    room.items?.forEach((item, itemIdx) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'item-row';
+
+                        if (window.adminModeActive) {
+                            const adminControls = document.createElement('div');
+                            adminControls.className = 'item-admin-controls';
+                            adminControls.innerHTML = `
+                                <button class="btn-item-edit" type="button" onclick="event.preventDefault(); editItem(${sectionIdx}, ${roomIdx}, ${itemIdx})">âœï¸</button>
+                                <button class="btn-item-delete" type="button" onclick="event.preventDefault(); deleteItem(${sectionIdx}, ${roomIdx}, ${itemIdx})">ðŸ—‘ï¸</button>
+                            `;
+                            itemDiv.appendChild(adminControls);
+                        }
+
+                        if (item.imageUrl) {
+                            const img = document.createElement('img');
+                            img.className = 'item-image';
+                            img.src = item.imageUrl;
+                            img.alt = item.name;
+                            img.onerror = function() { this.style.display = 'none'; };
+                            itemDiv.appendChild(img);
+                        } else {
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'item-image-placeholder';
+                            placeholder.textContent = window.adminModeActive ? 'Click to add' : 'No image';
+                            if (window.adminModeActive) {
+                                placeholder.onclick = () => editItem(sectionIdx, roomIdx, itemIdx);
+                            }
+                            itemDiv.appendChild(placeholder);
+                        }
+
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'item-content';
+
+                        if (section.type === 'restock') {
+                            contentDiv.innerHTML = `
+                                <div class="item-name">${item.name}</div>
+                                ${item.location ? `<div class="item-location">ðŸ“ ${item.location}</div>` : ''}
+                                <div class="controls">
+                                    <div class="stock-level">
+                                        <label class="stock-option full">
+                                            <input type="radio" name="${item.id}" value="full"> Full
+                                        </label>
+                                        <label class="stock-option low">
+                                            <input type="radio" name="${item.id}" value="low"> Low
+                                        </label>
+                                        <label class="stock-option empty">
+                                            <input type="radio" name="${item.id}" value="empty"> Empty
+                                        </label>
+                                    </div>
+                                    <label class="checkbox-label" style="color: #1fc8c8;">
+                                        <input type="checkbox" name="${item.id}_restock"> Restock
+                                    </label>
+                                    <input type="number" class="quantity-input" name="${item.id}_qty" placeholder="Qty" min="0">
+                                </div>
+                                <input type="text" class="notes-input" name="${item.id}_notes" placeholder="Notes (optional)">
+                            `;
+                        } else {
+                            contentDiv.innerHTML = `
+                                <div class="item-name">${item.name}</div>
+                                ${item.location ? `<div class="item-location">ðŸ“ ${item.location}</div>` : ''}
+                                <div class="controls">
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="${item.id}" value="yes"> Yes
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="${item.id}" value="no"> No
+                                        </label>
+                                    </div>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="${item.id}_damage"> Damaged
+                                    </label>
+                                </div>
+                                <input type="text" class="notes-input" name="${item.id}_notes" placeholder="Notes (optional)">
+                            `;
+                        }
+
+                        itemDiv.appendChild(contentDiv);
+                        sectionDiv.appendChild(itemDiv);
+                    });
+                });
+
+                container.appendChild(sectionDiv);
+            });
+
+            document.getElementById('addSectionBtn').style.display = window.adminModeActive ? 'block' : 'none';
+        }
+
+        // REPORTS FUNCTIONALITY
+        window.switchTab = function(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
             
-            document.getElementById(`${tabName}-tab`).classList.add('active');
+            document.getElementById(`${tabName}-tab`)?.classList.add('active');
             event.target.classList.add('active');
-            
-            if (tabName === 'calendar') {
-                renderCalendar();
-            } else if (tabName === 'reports') {
-                renderReports();
-            }
-        }
 
-        function updateTheftCounter() {
-            const lastTheftDate = localStorage.getItem('lastTheftDate');
-            const counterElement = document.getElementById('theftCounter');
-            const daysElement = document.getElementById('daysSinceTheft');
-            
-            if (lastTheftDate) {
-                const daysSince = Math.floor((new Date() - new Date(lastTheftDate)) / (1000 * 60 * 60 * 24));
-                daysElement.textContent = daysSince;
-                
-                if (daysSince < 30) {
-                    counterElement.classList.add('alert');
-                } else {
-                    counterElement.classList.remove('alert');
+            if (tabName === 'reports') {
+                loadReports();
+            }
+        };
+
+        async function loadReports() {
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '<div class="loading">Loading reports...</div>';
+
+            try {
+                const reportsSnapshot = await getDocs(collection(db, 'reports'));
+                window.allReports = [];
+                reportsSnapshot.forEach(doc => {
+                    window.allReports.push({ id: doc.id, ...doc.data() });
+                });
+
+                window.allReports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                if (window.allReports.length === 0) {
+                    reportsList.innerHTML = `
+                        <div class="no-reports">
+                            <div class="no-reports-icon">ðŸ“‹</div>
+                            <h3>No Reports Yet</h3>
+                            <p>Reports will appear here after inspections are submitted.</p>
+                        </div>
+                    `;
+                    return;
                 }
-            } else {
-                const firstCheck = localStorage.getItem('firstCheckDate');
-                if (firstCheck) {
-                    const daysSince = Math.floor((new Date() - new Date(firstCheck)) / (1000 * 60 * 60 * 24));
-                    daysElement.textContent = daysSince;
-                } else {
-                    daysElement.textContent = '0';
-                    localStorage.setItem('firstCheckDate', new Date().toISOString());
-                }
+
+                renderReports(window.allReports);
+            } catch (error) {
+                reportsList.innerHTML = `<div class="error">Error loading reports: ${error.message}</div>`;
             }
         }
 
-        updateTheftCounter();
+        function renderReports(reports) {
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '';
 
-        function sendEmailReport(report) {
-            const date = new Date(report.date + 'T00:00:00');
-            const formattedDate = date.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-            
-            const subject = `Spring Sparrow Inventory Report - ${formattedDate}`;
-            
-            let body = `SPRING SPARROW INVENTORY REPORT\n================================\n\n`;
-            body += `Inspection Date: ${formattedDate}\nInspector: ${report.inspector}\n`;
-            body += `Status: ${report.hasIssues ? 'ISSUES FOUND ⚠️' : 'ALL CLEAR ✅'}\n\n`;
-            
-            if (report.missing.length > 0) {
-                body += `MISSING ITEMS (${report.missing.length}):\n================================\n`;
-                report.missing.forEach(item => body += `• ${item}\n`);
-                body += `\n`;
-            }
-            
-            if (report.damaged.length > 0) {
-                body += `DAMAGED ITEMS (${report.damaged.length}):\n================================\n`;
-                report.damaged.forEach(item => body += `• ${item}\n`);
-                body += `\n`;
-            }
-
-            if (report.restockNeeded.length > 0) {
-                body += `RESTOCKING NEEDED (${report.restockNeeded.length}):\n================================\n`;
-                report.restockNeeded.forEach(item => body += `• ${item}\n`);
-                body += `\n`;
-            }
-            
-            if (!report.hasIssues && report.restockNeeded.length === 0) {
-                body += `All items present and in good condition. No restocking needed.\n\n`;
-            }
-            
-            body += `COMPLETE INVENTORY:\n================================\n\n`;
-            
-            const itemsByRoom = {};
-            report.allItems.forEach(item => {
-                if (!itemsByRoom[item.room]) itemsByRoom[item.room] = [];
-                itemsByRoom[item.room].push(item);
-            });
-            
-            Object.keys(itemsByRoom).forEach(room => {
-                body += `${room}:\n${'-'.repeat(room.length + 1)}\n`;
-                itemsByRoom[room].forEach(item => {
-                    const status = item.status === 'yes' ? '✓' : '✗';
-                    const damage = item.damaged ? ' [DAMAGED]' : '';
-                    const notes = item.notes ? ` - ${item.notes}` : '';
-                    body += `${status} ${item.name}${damage}${notes}\n`;
+            reports.forEach((report, idx) => {
+                // Calculate statistics
+                const itemsMap = {};
+                report.items.forEach(item => {
+                    const baseName = item.field.replace(/_damage|_notes|_qty|_restock/g, '');
+                    if (!itemsMap[baseName]) {
+                        itemsMap[baseName] = {};
+                    }
+                    
+                    if (item.field.endsWith('_damage')) {
+                        itemsMap[baseName].damaged = item.value === 'on';
+                    } else if (item.field.endsWith('_notes')) {
+                        itemsMap[baseName].notes = item.value;
+                    } else if (item.field.endsWith('_restock')) {
+                        itemsMap[baseName].needsRestock = item.value === 'on';
+                    } else if (item.field.endsWith('_qty')) {
+                        itemsMap[baseName].quantity = item.value;
+                    } else {
+                        itemsMap[baseName].status = item.value;
+                    }
                 });
-                body += `\n`;
-            });
 
-            if (report.restockItems && report.restockItems.length > 0) {
-                body += `RESTOCKING DETAILS:\n================================\n\n`;
-                
-                const restockByRoom = {};
-                report.restockItems.forEach(item => {
-                    if (!restockByRoom[item.room]) restockByRoom[item.room] = [];
-                    restockByRoom[item.room].push(item);
-                });
-                
-                Object.keys(restockByRoom).forEach(room => {
-                    body += `${room}:\n${'-'.repeat(room.length + 1)}\n`;
-                    restockByRoom[room].forEach(item => {
-                        const stockIcon = item.stockLevel === 'full' ? '✓' : (item.stockLevel === 'low' ? '⚠' : '✗');
-                        const restockFlag = item.needsRestock ? ' [RESTOCK NEEDED]' : '';
-                        const qty = item.quantity ? ` (Qty: ${item.quantity})` : '';
-                        const notes = item.notes ? ` - ${item.notes}` : '';
-                        body += `${stockIcon} ${item.name} - ${item.stockLevel.toUpperCase()}${restockFlag}${qty}${notes}\n`;
-                    });
-                    body += `\n`;
-                });
-            }
-            
-            body += `\n--\nThis report was generated automatically by the Spring Sparrow Inventory System.`;
-            
-            const mailtoLink = `mailto:keeya@springsparrowhousing.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.location.href = mailtoLink;
-        }
+                const missingCount = Object.values(itemsMap).filter(i => i.status === 'no' || i.status === 'empty').length;
+                const damagedCount = Object.values(itemsMap).filter(i => i.damaged).length;
+                const restockCount = Object.values(itemsMap).filter(i => i.needsRestock || i.status === 'low' || i.status === 'empty').length;
+                const hasIssues = missingCount > 0 || damagedCount > 0 || restockCount > 0;
 
-        document.getElementById('inventoryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.classList.add('loading');
-            
-            const formData = new FormData(e.target);
-            const inspectionDate = document.getElementById('inspectionDate').value;
-            const inspectorName = document.getElementById('inspectorName').value;
-            
-            let missing = [], damaged = [], theftDetected = false, allItems = [], restockNeeded = [], restockItemsData = [];
-            
-            for (let i = 1; i <= 24; i++) {
-                const status = formData.get(`item${i}`);
-                const isDamaged = formData.get(`item${i}_damage`);
-                const notes = formData.get(`item${i}_notes`);
-                const itemInfo = itemNames[`item${i}`];
-                
-                allItems.push({
-                    name: itemInfo.name,
-                    room: itemInfo.room,
-                    status: status,
-                    damaged: !!isDamaged,
-                    notes: notes || ''
-                });
-                
-                if (status === 'no') {
-                    missing.push(itemInfo.name);
-                    theftDetected = true;
-                }
-                if (isDamaged) damaged.push(itemInfo.name + (notes ? ` - ${notes}` : ''));
-            }
-
-            for (let i = 1; i <= 10; i++) {
-                const stockLevel = formData.get(`restock${i}`);
-                const needsRestock = formData.get(`restock${i}_needed`);
-                const quantity = formData.get(`restock${i}_qty`);
-                const notes = formData.get(`restock${i}_notes`);
-                const restockInfo = restockItems[`restock${i}`];
-                
-                restockItemsData.push({
-                    name: restockInfo.name,
-                    room: restockInfo.room,
-                    stockLevel: stockLevel,
-                    needsRestock: !!needsRestock,
-                    quantity: quantity || '',
-                    notes: notes || ''
-                });
-                
-                if (needsRestock || stockLevel === 'empty' || stockLevel === 'low') {
-                    const qtyText = quantity ? ` (Qty: ${quantity})` : '';
-                    const notesText = notes ? ` - ${notes}` : '';
-                    restockNeeded.push(`${restockInfo.name} - ${stockLevel.toUpperCase()}${qtyText}${notesText}`);
-                }
-            }
-            
-            const report = {
-                id: Date.now(),
-                date: inspectionDate,
-                inspector: inspectorName,
-                missing: missing,
-                damaged: damaged,
-                restockNeeded: restockNeeded,
-                allItems: allItems,
-                restockItems: restockItemsData,
-                hasIssues: missing.length > 0 || damaged.length > 0
-            };
-            
-            let reports = JSON.parse(localStorage.getItem('inventoryReports') || '[]');
-            reports.unshift(report);
-            localStorage.setItem('inventoryReports', JSON.stringify(reports));
-            
-            if (theftDetected) {
-                localStorage.setItem('lastTheftDate', inspectionDate);
-                updateTheftCounter();
-            }
-            
-            let summaryHTML = '<h3>📋 Inspection Summary</h3>';
-            summaryHTML += `<div class="summary-stat"><strong>Date:</strong> ${inspectionDate}</div>`;
-            summaryHTML += `<div class="summary-stat"><strong>Inspector:</strong> ${inspectorName}</div>`;
-            
-            if (missing.length > 0) {
-                summaryHTML += `<div class="summary-stat" style="color: #d9534f; font-weight: 700;">⚠️ MISSING ITEMS (${missing.length}):</div>`;
-                missing.forEach(item => summaryHTML += `<div style="color: #d9534f; margin-left: 20px;">• ${item}</div>`);
-            }
-            
-            if (damaged.length > 0) {
-                summaryHTML += `<div class="summary-stat" style="color: #f0ad4e; font-weight: 700; margin-top: 10px;">🔧 DAMAGED ITEMS (${damaged.length}):</div>`;
-                damaged.forEach(item => summaryHTML += `<div style="color: #f0ad4e; margin-left: 20px;">• ${item}</div>`);
-            }
-
-            if (restockNeeded.length > 0) {
-                summaryHTML += `<div class="summary-stat" style="color: #f5576c; font-weight: 700; margin-top: 10px;">🧴 RESTOCKING NEEDED (${restockNeeded.length}):</div>`;
-                restockNeeded.forEach(item => summaryHTML += `<div style="color: #f5576c; margin-left: 20px;">• ${item}</div>`);
-            }
-            
-            if (missing.length === 0 && damaged.length === 0 && restockNeeded.length === 0) {
-                summaryHTML += `<div class="summary-stat" style="color: #5cb85c; font-weight: 700;">✅ All items present and in good condition! No restocking needed.</div>`;
-            }
-            
-            const summaryDiv = document.getElementById('summary');
-            summaryDiv.innerHTML = summaryHTML;
-            summaryDiv.classList.add('show');
-            summaryDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
-            setTimeout(() => {
-                sendEmailReport(report);
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('loading');
-                alert('✅ Inventory report submitted!\n\n📧 Your email client will open to send the report.');
-                e.target.reset();
-                document.getElementById('inspectionDate').valueAsDate = new Date();
-            }, 500);
-        });
-
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            const monthYear = document.getElementById('calendarMonthYear');
-            const firstDay = new Date(currentYear, currentMonth, 1);
-            const lastDay = new Date(currentYear, currentMonth + 1, 0);
-            const prevLastDay = new Date(currentYear, currentMonth, 0);
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            
-            monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-            
-            let html = '';
-            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
-                html += `<div class="calendar-day-header">${day}</div>`;
-            });
-            
-            const reports = JSON.parse(localStorage.getItem('inventoryReports') || '[]');
-            const reportsByDate = {};
-            reports.forEach(report => reportsByDate[report.date] = report);
-            
-            const startDay = firstDay.getDay();
-            for (let i = startDay - 1; i >= 0; i--) {
-                const day = prevLastDay.getDate() - i;
-                html += `<div class="calendar-day other-month"><span class="calendar-day-number">${day}</span></div>`;
-            }
-            
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const report = reportsByDate[dateStr];
-                let classes = 'calendar-day';
-                if (report) classes += report.hasIssues ? ' has-issues' : ' has-report';
-                
-                html += `<div class="${classes}" onclick="viewCalendarDay('${dateStr}')">
-                    <span class="calendar-day-number">${day}</span>
-                    ${report ? '<span class="calendar-day-badge"></span>' : ''}
-                </div>`;
-            }
-            
-            const remainingDays = 42 - (startDay + lastDay.getDate());
-            for (let day = 1; day <= remainingDays; day++) {
-                html += `<div class="calendar-day other-month"><span class="calendar-day-number">${day}</span></div>`;
-            }
-            
-            grid.innerHTML = html;
-        }
-
-        function changeMonth(delta) {
-            if (delta === 0) {
-                currentMonth = new Date().getMonth();
-                currentYear = new Date().getFullYear();
-            } else {
-                currentMonth += delta;
-                if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-                else if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-            }
-            renderCalendar();
-        }
-
-        function viewCalendarDay(dateStr) {
-            const reports = JSON.parse(localStorage.getItem('inventoryReports') || '[]');
-            const report = reports.find(r => r.date === dateStr);
-            if (report) showReportModal(report);
-            else alert('No report found for this date.');
-        }
-
-        function renderReports() {
-            const container = document.getElementById('reportsList');
-            let reports = JSON.parse(localStorage.getItem('inventoryReports') || '[]');
-            
-            if (currentFilter === 'clean') reports = reports.filter(r => !r.hasIssues);
-            else if (currentFilter === 'issues') reports = reports.filter(r => r.hasIssues);
-            
-            if (reports.length === 0) {
-                container.innerHTML = `<div class="no-reports"><div class="no-reports-icon">📋</div><h3>No Reports Found</h3><p>Start by submitting your first inventory checklist.</p></div>`;
-                return;
-            }
-            
-            let html = '';
-            reports.forEach(report => {
-                const date = new Date(report.date + 'T00:00:00');
-                const formattedDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                
-                html += `<div class="report-card ${report.hasIssues ? 'has-issues' : ''}" onclick="showReportModal(${report.id})">
+                const card = document.createElement('div');
+                card.className = `report-card ${hasIssues ? 'has-issues' : ''}`;
+                card.innerHTML = `
                     <div class="report-card-header">
-                        <div class="report-date">${formattedDate}</div>
-                        <div class="report-status ${report.hasIssues ? 'issues' : 'clean'}">
-                            ${report.hasIssues ? '⚠️ Issues Found' : '✅ All Clear'}
+                        <div class="report-card-title">${report.unitName}</div>
+                        <div class="report-card-date">${new Date(report.timestamp).toLocaleDateString('en-US', { 
+                            weekday: 'short', 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</div>
+                    </div>
+                    
+                    <div class="report-card-info">
+                        <div class="report-info-item">
+                            <span class="report-info-label">Inspector:</span> ${report.inspector}
+                        </div>
+                        <div class="report-info-item">
+                            <span class="report-info-label">Date:</span> ${report.date}
+                        </div>
+                        <div class="report-info-item">
+                            <span class="report-info-label">Items Checked:</span> ${Object.keys(itemsMap).length}
                         </div>
                     </div>
-                    <div class="report-inspector">Inspector: ${report.inspector}</div>
-                    <div class="report-summary">
-                        ${report.missing?.length > 0 ? `<div class="report-stat missing">🚫 ${report.missing.length} Missing</div>` : ''}
-                        ${report.damaged?.length > 0 ? `<div class="report-stat damaged">🔧 ${report.damaged.length} Damaged</div>` : ''}
-                        ${report.restockNeeded?.length > 0 ? `<div class="report-stat restock">🧴 ${report.restockNeeded.length} Need Restock</div>` : ''}
-                        ${!report.hasIssues && (!report.restockNeeded || report.restockNeeded.length === 0) ? `<div class="report-stat clean">✅ All items accounted for</div>` : ''}
+
+                    <div class="report-status">
+                        ${hasIssues ? '' : '<span class="status-badge success">✅ All Clear</span>'}
+                        ${missingCount > 0 ? `<span class="status-badge danger">âš ï¸ ${missingCount} Missing</span>` : ''}
+                        ${damagedCount > 0 ? `<span class="status-badge danger">ðŸ”§ ${damagedCount} Damaged</span>` : ''}
+                        ${restockCount > 0 ? `<span class="status-badge warning">ðŸ“¦ ${restockCount} Need Restock</span>` : ''}
                     </div>
-                </div>`;
+
+                    <div class="report-details" id="details-${idx}">
+                        <div class="report-details-section">
+                            <h4>Issues Found:</h4>
+                            ${Object.entries(itemsMap).filter(([name, data]) => 
+                                data.status === 'no' || data.status === 'empty' || data.damaged || data.needsRestock
+                            ).map(([name, data]) => `
+                                <div class="report-item ${data.damaged ? 'critical' : 'issue'}">
+                                    <div class="report-item-name">${name}</div>
+                                    <div class="report-item-details">
+                                        ${data.status === 'no' || data.status === 'empty' ? 'âŒ Missing/Empty â€¢ ' : ''}
+                                        ${data.damaged ? 'ðŸ”§ Damaged â€¢ ' : ''}
+                                        ${data.needsRestock ? 'ðŸ“¦ Needs Restock â€¢ ' : ''}
+                                        ${data.status === 'low' ? 'âš ï¸ Low Stock â€¢ ' : ''}
+                                        ${data.notes ? `Note: ${data.notes}` : ''}
+                                    </div>
+                                </div>
+                            `).join('') || '<p style="color: #666;">No issues found.</p>'}
+                        </div>
+                        
+                        <button class="export-btn" onclick="exportReportToCSV('${report.id}')">ðŸ’¾ Export to CSV</button>
+                    </div>
+                `;
+
+                card.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('export-btn')) return;
+                    const details = document.getElementById(`details-${idx}`);
+                    details.classList.toggle('show');
+                });
+
+                reportsList.appendChild(card);
             });
-            container.innerHTML = html;
         }
 
-        function filterReports(filter) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            renderReports();
-        }
+        window.filterReports = function() {
+            const filterUnit = document.getElementById('filterUnit').value;
+            const filterDate = document.getElementById('filterDate').value;
+            const filterStatus = document.getElementById('filterStatus').value;
 
-        function showReportModal(reportIdOrObj) {
-            const reports = JSON.parse(localStorage.getItem('inventoryReports') || '[]');
-            const report = typeof reportIdOrObj === 'number' ? reports.find(r => r.id === reportIdOrObj) : reportIdOrObj;
+            let filtered = window.allReports;
+
+            if (filterUnit) {
+                filtered = filtered.filter(r => r.unit === filterUnit);
+            }
+
+            if (filterDate) {
+                filtered = filtered.filter(r => r.date === filterDate);
+            }
+
+            if (filterStatus === 'issues') {
+                filtered = filtered.filter(r => {
+                    const hasIssues = r.items.some(item => 
+                        item.value === 'no' || item.value === 'empty' || 
+                        item.field.endsWith('_damage') || 
+                        item.field.endsWith('_restock')
+                    );
+                    return hasIssues;
+                });
+            } else if (filterStatus === 'clean') {
+                filtered = filtered.filter(r => {
+                    const hasIssues = r.items.some(item => 
+                        item.value === 'no' || item.value === 'empty' || 
+                        item.field.endsWith('_damage') || 
+                        item.field.endsWith('_restock')
+                    );
+                    return !hasIssues;
+                });
+            }
+
+            renderReports(filtered);
+        };
+
+        window.exportReportToCSV = function(reportId) {
+            const report = window.allReports.find(r => r.id === reportId);
             if (!report) return;
-            
-            const date = new Date(report.date + 'T00:00:00');
-            const formattedDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
-            let html = `<div class="detail-section">
-                <h3>Report Information</h3>
-                <div class="detail-item"><strong>Date:</strong> ${formattedDate}</div>
-                <div class="detail-item"><strong>Inspector:</strong> ${report.inspector}</div>
-                <div class="detail-item"><strong>Status:</strong> <span style="color: ${report.hasIssues ? '#d9534f' : '#5cb85c'}; font-weight: 700;">${report.hasIssues ? '⚠️ Issues Found' : '✅ All Clear'}</span></div>
-            </div>`;
-            
-            if (report.missing?.length > 0) {
-                html += `<div class="detail-section"><h3 style="color: #d9534f;">Missing Items (${report.missing.length})</h3>`;
-                report.missing.forEach(item => html += `<div class="detail-item" style="color: #d9534f;">🚫 ${item}</div>`);
-                html += `</div>`;
-            }
-            
-            if (report.damaged?.length > 0) {
-                html += `<div class="detail-section"><h3 style="color: #f0ad4e;">Damaged Items (${report.damaged.length})</h3>`;
-                report.damaged.forEach(item => html += `<div class="detail-item" style="color: #f0ad4e;">🔧 ${item}</div>`);
-                html += `</div>`;
-            }
 
-            if (report.restockNeeded?.length > 0) {
-                html += `<div class="detail-section"><h3 style="color: #f5576c;">Restocking Needed (${report.restockNeeded.length})</h3>`;
-                report.restockNeeded.forEach(item => html += `<div class="detail-item" style="color: #f5576c;">🧴 ${item}</div>`);
-                html += `</div>`;
-            }
+            let csv = 'Item,Status,Damaged,Notes\n';
             
-            const itemsByRoom = {};
-            if (report.allItems) {
-                report.allItems.forEach(item => {
-                    if (!itemsByRoom[item.room]) itemsByRoom[item.room] = [];
-                    itemsByRoom[item.room].push(item);
-                });
-            }
-            
-            html += `<div class="detail-section"><h3>Complete Inventory</h3>`;
-            Object.keys(itemsByRoom).forEach(room => {
-                html += `<h4 style="margin-top: 15px; color: #667eea;">${room}</h4>`;
-                itemsByRoom[room].forEach(item => {
-                    const statusIcon = item.status === 'yes' ? '✅' : '🚫';
-                    const statusColor = item.status === 'yes' ? '#5cb85c' : '#d9534f';
-                    const damageText = item.damaged ? ' | 🔧 Damaged' : '';
-                    const notesText = item.notes ? ` | Notes: ${item.notes}` : '';
-                    html += `<div class="detail-item"><span style="color: ${statusColor};">${statusIcon} ${item.name}</span>${damageText}${notesText}</div>`;
-                });
+            report.items.forEach(item => {
+                const name = item.field.replace(/_damage|_notes|_qty|_restock/g, '');
+                const value = item.value;
+                csv += `"${name}","${value}","",""\n`;
             });
-            html += `</div>`;
 
-            if (report.restockItems?.length > 0) {
-                const restockByRoom = {};
-                report.restockItems.forEach(item => {
-                    if (!restockByRoom[item.room]) restockByRoom[item.room] = [];
-                    restockByRoom[item.room].push(item);
-                });
-                
-                html += `<div class="detail-section"><h3>Restocking Status</h3>`;
-                Object.keys(restockByRoom).forEach(room => {
-                    html += `<h4 style="margin-top: 15px; color: #f5576c;">${room}</h4>`;
-                    restockByRoom[room].forEach(item => {
-                        const stockIcon = item.stockLevel === 'full' ? '✅' : (item.stockLevel === 'low' ? '⚠️' : '🚫');
-                        const stockColor = item.stockLevel === 'full' ? '#5cb85c' : (item.stockLevel === 'low' ? '#f0ad4e' : '#d9534f');
-                        const restockText = item.needsRestock ? ' | 🔄 RESTOCK NEEDED' : '';
-                        const qtyText = item.quantity ? ` | Qty: ${item.quantity}` : '';
-                        const notesText = item.notes ? ` | Notes: ${item.notes}` : '';
-                        html += `<div class="detail-item"><span style="color: ${stockColor};">${stockIcon} ${item.name} - ${item.stockLevel.toUpperCase()}</span>${restockText}${qtyText}${notesText}</div>`;
-                    });
-                });
-                html += `</div>`;
-            }
-            
-            document.getElementById('modalBody').innerHTML = html;
-            document.getElementById('reportModal').classList.add('show');
-        }
-
-        function closeModal() {
-            document.getElementById('reportModal').classList.remove('show');
-        }
-
-        function exportReports() {
-            const reports = JSON.parse(localStorage.getItem('inventoryReports') || '[]');
-            if (reports.length === 0) { alert('No reports to export.'); return; }
-            
-            let csv = 'Date,Inspector,Status,Missing Count,Damaged Count,Restock Count,Missing Items,Damaged Items,Restock Items\n';
-            reports.forEach(report => {
-                const status = report.hasIssues ? 'Issues Found' : 'All Clear';
-                const missingItems = report.missing ? report.missing.join('; ') : '';
-                const damagedItems = report.damaged ? report.damaged.join('; ') : '';
-                const restockItems = report.restockNeeded ? report.restockNeeded.join('; ') : '';
-                csv += `"${report.date}","${report.inspector}","${status}",${report.missing?.length || 0},${report.damaged?.length || 0},${report.restockNeeded?.length || 0},"${missingItems}","${damagedItems}","${restockItems}"\n`;
-            });
-            
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `spring-sparrow-reports-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `report-${report.unitName}-${report.date}.csv`;
             a.click();
-            window.URL.revokeObjectURL(url);
-        }
+        };
 
-        document.getElementById('reportModal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
+        // ADMIN FUNCTIONS
+        window.toggleAdminMode = function() {
+            if (!window.isAdmin) {
+                const passcode = prompt('Enter admin passcode:');
+                if (passcode !== '2008') {
+                    alert('âŒ Incorrect passcode');
+                    return;
+                }
+                window.isAdmin = true;
+            }
+
+            window.adminModeActive = !window.adminModeActive;
+            const btn = document.getElementById('adminToggle');
+            const banner = document.getElementById('adminBanner');
+
+            if (window.adminModeActive) {
+                btn.classList.add('active');
+                btn.textContent = 'ðŸ‘ï¸ Crew View';
+                banner.style.display = 'block';
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = 'âš™ï¸ Admin';
+                banner.style.display = 'none';
+            }
+
+            renderInventory();
+        };
+
+        window.editItem = function(sectionIdx, roomIdx, itemIdx) {
+            const item = window.currentInventory.sections[sectionIdx].rooms[roomIdx].items[itemIdx];
+            window.editingItem = { sectionIdx, roomIdx, itemIdx };
+
+            document.getElementById('modalTitle').textContent = 'Edit Item';
+            document.getElementById('editItemName').value = item.name;
+            document.getElementById('editItemLocation').value = item.location || '';
+            document.getElementById('editItemImageUrl').value = item.imageUrl || '';
+            document.getElementById('editModal').classList.add('show');
+        };
+
+        window.saveItemEdit = async function() {
+            if (!window.editingItem) return;
+
+            const { sectionIdx, roomIdx, itemIdx } = window.editingItem;
+            const item = window.currentInventory.sections[sectionIdx].rooms[roomIdx].items[itemIdx];
+
+            item.name = document.getElementById('editItemName').value;
+            item.location = document.getElementById('editItemLocation').value;
+            item.imageUrl = document.getElementById('editItemImageUrl').value;
+
+            const unitId = document.getElementById('unitLocation').value;
+            await setDoc(doc(db, 'inventory', unitId), window.currentInventory);
+
+            closeModal();
+            renderInventory();
+        };
+
+        window.deleteItem = async function(sectionIdx, roomIdx, itemIdx) {
+            if (!confirm('Delete this item?')) return;
+
+            window.currentInventory.sections[sectionIdx].rooms[roomIdx].items.splice(itemIdx, 1);
+
+            const unitId = document.getElementById('unitLocation').value;
+            await setDoc(doc(db, 'inventory', unitId), window.currentInventory);
+
+            renderInventory();
+        };
+
+        window.addItem = function(sectionIdx, roomIdx) {
+            const name = prompt('Enter item name:');
+            if (!name) return;
+
+            const location = prompt('Enter location (optional):');
+
+            const newItem = {
+                id: 'item_' + Date.now(),
+                name: name,
+                location: location || '',
+                imageUrl: ''
+            };
+
+            window.currentInventory.sections[sectionIdx].rooms[roomIdx].items.push(newItem);
+
+            const unitId = document.getElementById('unitLocation').value;
+            setDoc(doc(db, 'inventory', unitId), window.currentInventory).then(() => {
+                renderInventory();
+            });
+        };
+
+        window.addRoom = function(sectionIdx) {
+            const name = prompt('Enter room name:');
+            if (!name) return;
+
+            const newRoom = {
+                name: name,
+                items: []
+            };
+
+            if (!window.currentInventory.sections[sectionIdx].rooms) {
+                window.currentInventory.sections[sectionIdx].rooms = [];
+            }
+
+            window.currentInventory.sections[sectionIdx].rooms.push(newRoom);
+
+            const unitId = document.getElementById('unitLocation').value;
+            setDoc(doc(db, 'inventory', unitId), window.currentInventory).then(() => {
+                renderInventory();
+            });
+        };
+
+        window.deleteRoom = async function(sectionIdx, roomIdx) {
+            if (!confirm('Delete this room?')) return;
+
+            window.currentInventory.sections[sectionIdx].rooms.splice(roomIdx, 1);
+
+            const unitId = document.getElementById('unitLocation').value;
+            await setDoc(doc(db, 'inventory', unitId), window.currentInventory);
+
+            renderInventory();
+        };
+
+        window.deleteSection = async function(sectionIdx) {
+            if (!confirm('Delete this entire section?')) return;
+
+            window.currentInventory.sections.splice(sectionIdx, 1);
+
+            const unitId = document.getElementById('unitLocation').value;
+            await setDoc(doc(db, 'inventory', unitId), window.currentInventory);
+
+            renderInventory();
+        };
+
+        window.addNewSection = function() {
+            const name = prompt('Enter section name (include emoji):');
+            if (!name) return;
+
+            const type = confirm('Is this a restocking section? (OK = Yes, Cancel = No)') ? 'restock' : 'checklist';
+
+            const newSection = {
+                id: 'section_' + Date.now(),
+                name: name,
+                type: type,
+                rooms: [{
+                    name: 'All Items',
+                    items: []
+                }]
+            };
+
+            window.currentInventory.sections.push(newSection);
+
+            const unitId = document.getElementById('unitLocation').value;
+            setDoc(doc(db, 'inventory', unitId), window.currentInventory).then(() => {
+                renderInventory();
+            });
+        };
+
+        window.closeModal = function() {
+            document.getElementById('editModal').classList.remove('show');
+            window.editingItem = null;
+        };
+
+        document.getElementById('inventoryForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const unitSelect = document.getElementById('unitLocation');
+
+            // ── Validation ──
+            if (!unitSelect.value) {
+                alert('⚠️ Please select a unit before submitting.');
+                return;
+            }
+
+            // Find all radio groups (each item has a named group)
+            const allRadioGroups = new Set();
+            document.querySelectorAll('#inventoryItems input[type="radio"]').forEach(r => {
+                // Only track base item names (not _restock etc)
+                if (!r.name.endsWith('_restock')) allRadioGroups.add(r.name);
+            });
+
+            const unanswered = [];
+            allRadioGroups.forEach(name => {
+                const answered = document.querySelector(`input[name="${name}"]:checked`);
+                if (!answered) unanswered.push(name);
+            });
+
+            if (unanswered.length > 0) {
+                // Highlight unanswered items
+                document.querySelectorAll('.item-row').forEach(row => row.style.background = '');
+                unanswered.forEach(name => {
+                    const radio = document.querySelector(`input[name="${name}"]`);
+                    if (radio) {
+                        const row = radio.closest('.item-row');
+                        if (row) row.style.background = '#fff0f0';
+                    }
+                });
+                // Scroll to first unanswered
+                const firstRadio = document.querySelector(`input[name="${unanswered[0]}"]`);
+                if (firstRadio) firstRadio.closest('.item-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                alert(`⚠️ ${unanswered.length} item${unanswered.length > 1 ? 's' : ''} still need a response.
+
+They are highlighted in red — please scroll through and complete them.`);
+                return;
+            }
+
+            // Clear any highlights
+            document.querySelectorAll('.item-row').forEach(row => row.style.background = '');
+
+            const formData = new FormData(e.target);
+            
+            const report = {
+                date: new Date().toISOString().split('T')[0],
+                unit: unitSelect.value,
+                unitName: unitSelect.selectedOptions[0].text,
+                inspector: "Vita Professional Cleaning Crew",
+                timestamp: new Date().toISOString(),
+                items: []
+            };
+
+            for (let [key, value] of formData.entries()) {
+                report.items.push({ field: key, value: value });
+            }
+
+            try {
+                await addDoc(collection(db, 'reports'), report);
+                alert('✅ Report submitted successfully!');
+                e.target.reset();
+            } catch (error) {
+                alert('âŒ Error: ' + error.message);
+            }
         });
 
-        renderCalendar();
+        // ═══════════════════════════════════════════════════
+        // BEFORE & AFTER EVIDENCE — Photo + Video Upload
+        // ═══════════════════════════════════════════════════
+
+        const EVIDENCE_ROOMS = ['Kitchen','Living Room','Bedroom','Bathroom','Hallway','Exterior','Laundry','Garage','Stove / Oven','Windows & Screens','Thermostat','Other'];
+        let evidencePendingTag = { pairId: null, side: null };
+        let evidenceSelectedRoom = null;
+
+        
+        window.openPhotoBucket = function() {
+            document.getElementById('photoBucketModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closePhotoBucket = function() {
+            document.getElementById('photoBucketModal').style.display = 'none';
+            document.body.style.overflow = '';
+            updatePhotoBucketBadge();
+        };
+
+        function updatePhotoBucketBadge() {
+            const total = (window.sessionPairs||[]).reduce((n,p) => {
+                if(p.before?.url) n++; if(p.after?.url) n++; return n;
+            }, 0);
+            const pairs = (window.sessionPairs||[]).length;
+            const countEl = document.getElementById('photoBucketCount');
+            const modalCountEl = document.getElementById('modalPhotoCount');
+            const text = total > 0
+                ? `${total} file${total!==1?'s':''} in ${pairs} pair${pairs!==1?'s':''}`
+                : 'Tap to add photos & videos';
+            if (countEl) countEl.textContent = text;
+            if (modalCountEl) modalCountEl.textContent = total > 0 ? `${total} file${total!==1?'s':''} added` : '0 files added';
+        }
+
+        window.toggleEvidenceTip = function() {
+            const body = document.getElementById('evidenceTipBody');
+            const btn = document.getElementById('evidenceTipBtn');
+            const visible = body.style.display === 'block';
+            body.style.display = visible ? 'none' : 'block';
+            btn.textContent = visible ? 'Show what to document ▼' : 'Hide ▲';
+        };
+
+        window.addEvidencePair = function() {
+            window.pairCounter++;
+            const id = window.pairCounter;
+            window.sessionPairs.push({
+                id,
+                before: { url: null, storageUrl: null, timestamp: null, tag: null, caption: '', isVideo: false },
+                after:  { url: null, storageUrl: null, timestamp: null, tag: null, caption: '', isVideo: false }
+            });
+            renderEvidencePairs();
+        };
+
+        window.removeEvidencePair = function(id) {
+            window.sessionPairs = window.sessionPairs.filter(p => p.id !== id);
+            renderEvidencePairs();
+        };
+
+        function renderEvidencePairs() {
+            const container = document.getElementById('evidencePairs');
+            container.innerHTML = '';
+            window.sessionPairs.forEach(pair => {
+                const card = document.createElement('div');
+                card.style.cssText = 'border:2px solid #e9ecef; border-radius:12px; overflow:hidden;';
+                card.innerHTML = `
+                    <div style="background:#f8f9fa; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e9ecef;">
+                        <span style="font-weight:700; color:#333; font-size:14px;">📋 Evidence Pair #${pair.id}</span>
+                        <button type="button" onclick="removeEvidencePair(${pair.id})" style="background:none;border:none;color:#f45c43;font-size:18px;cursor:pointer;">🗑</button>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr;">
+                        ${renderEvidenceCol(pair, 'before')}
+                        ${renderEvidenceCol(pair, 'after')}
+                    </div>
+                `;
+                container.appendChild(card);
+
+                ['before','after'].forEach(side => {
+                    const input = card.querySelector(`#ev-input-${pair.id}-${side}`);
+                    if (input) input.addEventListener('change', e => handleEvidenceFile(e, pair.id, side));
+                });
+            });
+        }
+
+        function renderEvidenceCol(pair, side) {
+            const d = pair[side];
+            const isBefore = side === 'before';
+            const borderRight = isBefore ? 'border-right:2px solid #e9ecef;' : '';
+            const labelColor = isBefore ? '#f0ad4e' : '#5cb85c';
+            const labelText = isBefore ? '🟡 BEFORE' : '🟢 AFTER';
+            const tagHtml = d.tag
+                ? `<span style="background:#1fc8c8;color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">📍 ${d.tag}</span>`
+                : `<span style="color:#bbb;font-size:11px;">No tag yet</span>`;
+            const mediaHtml = d.url
+                ? (d.isVideo
+                    ? `<video src="${d.url}" style="width:100%;height:100%;object-fit:cover;" muted playsinline></video>`
+                    : `<img src="${d.url}" style="width:100%;height:100%;object-fit:cover;">`)
+                : `<div style="text-align:center;color:#aaa;font-size:12px;padding:8px;line-height:1.6;">
+                        <div style="font-size:28px;margin-bottom:6px;">${isBefore ? '📷' : '✅'}</div>
+                        Tap for<br><strong>${isBefore ? 'BEFORE' : 'AFTER'}</strong><br>photo or video
+                        <div style="font-size:10px;color:#ccc;margin-top:4px;">Photo or Video</div>
+                   </div>`;
+
+            return `
+                <div style="padding:14px; ${borderRight}">
+                    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${labelColor};margin-bottom:10px;">${labelText}</div>
+                    <div onclick="evidenceSlotClick(${pair.id},'${side}')"
+                         style="aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;
+                                background:#f8f9fa;border:2px ${d.url ? 'solid #1fc8c8' : 'dashed #ddd'};
+                                display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:10px;">
+                        ${mediaHtml}
+                        ${d.url ? `
+                        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:white;font-size:9px;padding:3px 6px;text-align:center;">${d.timestamp||''}</div>
+                        <button type="button" onclick="retakeEvidence(event,${pair.id},'${side}')" style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:6px;font-size:10px;padding:3px 7px;cursor:pointer;font-weight:600;">↺ Retake</button>
+                        <span style="position:absolute;top:5px;left:5px;background:rgba(0,0,0,0.7);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;">${d.isVideo ? '🎥' : '📷'}</span>
+                        ` : ''}
+                    </div>
+                    <input type="file" accept="image/*,video/*" capture="environment"
+                           id="ev-input-${pair.id}-${side}" style="display:none;">
+                    <div style="margin-bottom:6px;">
+                        <div style="font-size:12px;font-weight:700;color:#666;margin-bottom:4px;">📍 Location:</div>
+                        <div style="margin-bottom:5px;">${tagHtml}</div>
+                        ${d.url ? `<button type="button" onclick="openEvidenceTagModal(${pair.id},'${side}')" style="font-size:11px;padding:4px 10px;border:2px solid #1fc8c8;background:white;color:#1fc8c8;border-radius:6px;cursor:pointer;font-weight:700;">${d.tag ? '✏️ Change' : '➕ Tag Location'}</button>` : ''}
+                    </div>
+                    ${d.url ? `<input type="text" placeholder="Caption (optional)..." value="${d.caption||''}"
+                        oninput="updateEvidenceCaption(${pair.id},'${side}',this.value)"
+                        style="width:100%;padding:7px 10px;border:2px solid #ddd;border-radius:8px;font-size:12px;font-family:inherit;">` : ''}
+                </div>
+            `;
+        }
+
+        window.evidenceSlotClick = function(pairId, side) {
+            const pair = window.sessionPairs.find(p => p.id === pairId);
+            if (pair[side].url) return;
+            document.getElementById(`ev-input-${pairId}-${side}`).click();
+        };
+
+        window.retakeEvidence = function(event, pairId, side) {
+            event.stopPropagation();
+            document.getElementById(`ev-input-${pairId}-${side}`).click();
+        };
+
+        window.handleEvidenceFile = async function(event, pairId, side) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const isVideo = file.type.startsWith('video/');
+            const localUrl = URL.createObjectURL(file);
+            const now = new Date();
+            const ts = now.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+            const pair = window.sessionPairs.find(p => p.id === pairId);
+            pair[side].url = localUrl;
+            pair[side].timestamp = ts;
+            pair[side].isVideo = isVideo;
+            renderEvidencePairs();
+            updatePhotoBucketBadge();
+            openEvidenceTagModal(pairId, side);
+
+            // Upload to Firebase Storage in background
+            try {
+                const unitId = document.getElementById('unitLocation').value;
+                const unitName = document.getElementById('unitLocation').selectedOptions[0].text.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30);
+                const ext = isVideo ? 'mp4' : 'jpg';
+                const fileName = `${side}_${now.toISOString().replace(/[:.]/g,'-').slice(0,19)}.${ext}`;
+                const storageRef = ref(storage, `photos/${unitId}/${unitName}/${fileName}`);
+                const fileToUpload = isVideo ? file : await compressImage(file);
+                await uploadBytes(storageRef, fileToUpload, {
+                    customMetadata: { uploadedAt: now.toISOString(), side, unitId }
+                });
+                const downloadURL = await getDownloadURL(storageRef);
+                pair[side].storageUrl = downloadURL;
+                pair[side].url = downloadURL;
+                console.log('✅ Uploaded:', fileName);
+            } catch(err) {
+                console.warn('Upload failed, using local preview:', err.message);
+            }
+            event.target.value = '';
+        };
+
+        function compressImage(file) {
+            return new Promise(resolve => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.onload = () => {
+                    const MAX = 1200;
+                    let w = img.width, h = img.height;
+                    if (w > MAX || h > MAX) {
+                        if (w > h) { h = Math.round(h*MAX/w); w=MAX; }
+                        else { w = Math.round(w*MAX/h); h=MAX; }
+                    }
+                    canvas.width=w; canvas.height=h;
+                    ctx.drawImage(img,0,0,w,h);
+                    canvas.toBlob(resolve,'image/jpeg',0.82);
+                };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        window.updateEvidenceCaption = function(pairId, side, value) {
+            const pair = window.sessionPairs.find(p => p.id === pairId);
+            if (pair) pair[side].caption = value;
+        };
+
+        // Tag modal
+        window.openEvidenceTagModal = function(pairId, side) {
+            evidencePendingTag = { pairId, side };
+            evidenceSelectedRoom = null;
+            const pair = window.sessionPairs.find(p => p.id === pairId);
+            const existing = pair ? pair[side].tag : null;
+            const isVideo = pair ? pair[side].isVideo : false;
+
+            // Build modal
+            let modalEl = document.getElementById('evidenceTagModal');
+            if (!modalEl) {
+                modalEl = document.createElement('div');
+                modalEl.id = 'evidenceTagModal';
+                modalEl.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10000;align-items:flex-end;justify-content:center;padding:20px;';
+                modalEl.innerHTML = `
+                    <div style="background:white;border-radius:16px;width:100%;max-width:480px;padding:24px;">
+                        <h3 id="evTagTitle" style="font-size:18px;margin-bottom:6px;color:#333;text-align:center;"></h3>
+                        <p style="font-size:12px;color:#888;text-align:center;margin-bottom:16px;">This helps identify the file if a dispute comes up</p>
+                        <div id="evTagPills" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"></div>
+                        <input id="evTagOther" placeholder="Describe location (e.g. Master Bedroom Closet)..."
+                               style="width:100%;padding:10px 14px;border:2px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:14px;font-family:inherit;display:none;">
+                        <button type="button" onclick="confirmEvidenceTag()"
+                                style="width:100%;padding:14px;background:#1fc8c8;color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">
+                            ✅ Save Location Tag
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(modalEl);
+            }
+
+            document.getElementById('evTagTitle').textContent =
+                `📍 Where is this ${side === 'before' ? 'BEFORE' : 'AFTER'} ${isVideo ? 'video' : 'photo'}?`;
+
+            const pillsEl = document.getElementById('evTagPills');
+            pillsEl.innerHTML = '';
+            EVIDENCE_ROOMS.forEach(room => {
+                const pill = document.createElement('div');
+                pill.style.cssText = `padding:12px;border-radius:10px;border:2px solid ${existing===room?'#1fc8c8':'#e9ecef'};background:${existing===room?'#1fc8c8':'#f8f9fa'};font-size:14px;font-weight:600;cursor:pointer;text-align:center;color:${existing===room?'white':'#444'};`;
+                pill.textContent = room;
+                pill.onclick = () => {
+                    evidenceSelectedRoom = room;
+                    pillsEl.querySelectorAll('div').forEach(p => {
+                        p.style.background='#f8f9fa'; p.style.borderColor='#e9ecef'; p.style.color='#444';
+                    });
+                    pill.style.background='#1fc8c8'; pill.style.borderColor='#1fc8c8'; pill.style.color='white';
+                    const other = document.getElementById('evTagOther');
+                    other.style.display = room === 'Other' ? 'block' : 'none';
+                    if (room !== 'Other') other.value = '';
+                };
+                pillsEl.appendChild(pill);
+            });
+
+            const otherInput = document.getElementById('evTagOther');
+            if (existing && !EVIDENCE_ROOMS.slice(0,-1).includes(existing)) {
+                otherInput.style.display='block'; otherInput.value=existing; evidenceSelectedRoom='Other';
+            } else { otherInput.style.display='none'; otherInput.value=''; }
+
+            modalEl.style.display = 'flex';
+        };
+
+        window.confirmEvidenceTag = function() {
+            if (!evidenceSelectedRoom) { alert('Please select a location first.'); return; }
+            const other = document.getElementById('evTagOther');
+            const finalTag = evidenceSelectedRoom === 'Other' ? (other.value.trim() || 'Other') : evidenceSelectedRoom;
+            const pair = window.sessionPairs.find(p => p.id === evidencePendingTag.pairId);
+            if (pair) pair[evidencePendingTag.side].tag = finalTag;
+            document.getElementById('evidenceTagModal').style.display = 'none';
+            renderEvidencePairs();
+        };
+
     </script>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PHOTO BUCKET MODAL (full-screen, mobile-first) -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="photoBucketModal" style="
+        display:none; position:fixed; inset:0; z-index:2000;
+        background:#f5f5f7; flex-direction:column; overflow:hidden;
+    ">
+        <!-- Modal header -->
+        <div style="
+            background:linear-gradient(135deg,#1fc8c8 0%,#12a5a5 100%);
+            color:white; padding:16px 20px;
+            display:flex; align-items:center; justify-content:space-between;
+            flex-shrink:0;
+        ">
+            <div>
+                <div style="font-size:18px; font-weight:800;">📸 Before &amp; After Evidence</div>
+                <div style="font-size:12px; opacity:0.85; margin-top:2px;" id="modalPhotoCount">0 files added</div>
+            </div>
+            <button type="button" onclick="closePhotoBucket()" style="
+                background:rgba(255,255,255,0.2); border:2px solid white;
+                color:white; border-radius:10px; padding:8px 16px;
+                font-size:14px; font-weight:700; cursor:pointer;
+            ">✕ Close</button>
+        </div>
+
+        <!-- Scrollable content -->
+        <div style="flex:1; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch;">
+
+            <!-- Evidence tip -->
+            <div style="background:linear-gradient(135deg,#fff3cd,#ffeaa7); border:2px solid #f0ad4e; border-radius:12px; padding:14px 16px; margin-bottom:14px;">
+                <div style="font-size:14px; font-weight:800; color:#856404; margin-bottom:4px;">⚠️ Protect Spring Sparrow from False Damage Claims</div>
+                <div style="font-size:13px; color:#6d4c00; line-height:1.6;">
+                    We suspect guests may have damaged items or exaggerated minor issues to break their contract. <strong>Your documentation is our best protection.</strong>
+                </div>
+                <button type="button" onclick="toggleEvidenceTip()" id="evidenceTipBtn"
+                    style="background:none;border:none;color:#856404;font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;margin-top:6px;padding:0;">
+                    Show what to document ▼
+                </button>
+                <div id="evidenceTipBody" style="display:none; margin-top:10px; font-size:12px; color:#6d4c00; line-height:1.6;">
+                    Close-ups of: beds &amp; mattresses, furniture, dressers, stove, fridge, TV, windows &amp; screens, thermostat, bathroom fixtures, towel bars, light fixtures, doors &amp; locks.
+                    <div style="margin-top:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:8px; font-size:11px;">
+                        💡 <em>A guest once bent a window screen further and broke the thermostat to fake poor quality — we had no before photos. Don't let that happen again.</em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media type guide -->
+            <div style="text-align:center; font-size:13px; color:#0a5858; background:#e8f9f9; border:2px solid #1fc8c8; border-radius:10px 10px 0 0; padding:10px 14px;">
+                📱 Your camera opens for each slot — choose <strong>Photo</strong> or <strong>Video</strong>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; border:2px solid #1fc8c8; border-top:none; border-radius:0 0 10px 10px; overflow:hidden; margin-bottom:14px;">
+                <div style="padding:12px 10px; text-align:center; background:#f0f7ff; border-right:1px solid #1fc8c8;">
+                    <div style="font-size:26px;">🎥</div>
+                    <div style="font-size:12px; font-weight:800; color:#1fc8c8; text-transform:uppercase; letter-spacing:0.5px; margin:4px 0;">Video</div>
+                    <div style="font-size:11px; color:#555; line-height:1.4;">Room walkthroughs — pan slowly</div>
+                </div>
+                <div style="padding:12px 10px; text-align:center; background:#f0fff4;">
+                    <div style="font-size:26px;">📷</div>
+                    <div style="font-size:12px; font-weight:800; color:#1fc8c8; text-transform:uppercase; letter-spacing:0.5px; margin:4px 0;">Close-Up Photo</div>
+                    <div style="font-size:11px; color:#555; line-height:1.4;">Individual items — stove, TV, screens</div>
+                </div>
+            </div>
+
+            <!-- General notes -->
+            <div style="background:white; border-radius:10px; padding:14px; margin-bottom:14px; border:2px solid #e9ecef;">
+                <label style="display:block; font-weight:700; color:#333; margin-bottom:8px; font-size:14px;">🗒️ General Notes</label>
+                <textarea id="generalNotes" placeholder="Overall unit condition, issues noticed, anything the property manager should know..."
+                    style="width:100%; padding:10px; border:2px solid #ddd; border-radius:8px; font-size:15px; min-height:80px; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+
+            <!-- Add pair CTA -->
+            <button type="button" onclick="addEvidencePair()" style="
+                width:100%; padding:16px;
+                background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);
+                color:white; border:none; border-radius:12px;
+                font-size:17px; font-weight:800; cursor:pointer;
+                margin-bottom:16px;
+                box-shadow:0 6px 0 #0d7a7a, 0 8px 16px rgba(0,0,0,0.25);
+                text-shadow:0 1px 2px rgba(0,0,0,0.2);
+                display:flex; flex-direction:column; align-items:center; gap:2px;
+            ">
+                <span>➕ Add Before &amp; After Evidence</span>
+                <span style="font-size:13px; font-weight:600; opacity:0.85;">Photo or Video</span>
+            </button>
+
+            <!-- Pairs render here -->
+            <div id="evidencePairs" style="display:flex; flex-direction:column; gap:14px; padding-bottom:30px;"></div>
+        </div>
+
+        <!-- Sticky footer — Done button -->
+        <div style="
+            flex-shrink:0; padding:14px 16px;
+            background:white; border-top:2px solid #e9ecef;
+            box-shadow:0 -4px 12px rgba(0,0,0,0.08);
+        ">
+            <button type="button" onclick="closePhotoBucket()" style="
+                width:100%; padding:16px;
+                background:linear-gradient(135deg,#1fc8c8 0%,#12a5a5 100%);
+                color:white; border:none; border-radius:12px;
+                font-size:17px; font-weight:800; cursor:pointer;
+                box-shadow:0 4px 12px rgba(31,200,200,0.4);
+            ">✅ Done — Return to Checklist</button>
+        </div>
+    </div>
+
 </body>
 </html>
