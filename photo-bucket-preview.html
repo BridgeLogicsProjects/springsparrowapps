@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📸 Before & After Evidence — Spring Sparrow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f7;
+            padding: 20px;
+        }
+        .container { max-width: 760px; margin: 0 auto; }
+
+        .preview-label {
+            background: #333; color: #ffd700;
+            text-align: center; padding: 10px;
+            border-radius: 8px 8px 0 0;
+            font-size: 13px; font-weight: 700; letter-spacing: 1px;
+        }
+
+        .photo-bucket {
+            border: 2px solid #1fc8c8;
+            border-radius: 0 0 12px 12px;
+            overflow: hidden; background: white;
+        }
+
+        .bucket-header {
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
+            color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .bucket-header h2 { font-size: 18px; font-weight: 700; }
+        .count-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 13px; font-weight: 700;
+        }
+
+        .bucket-body { padding: 20px; }
+
+        /* ── Media type two-col ── */
+        .media-info-header {
+            text-align: center;
+            font-size: 14px;
+            color: #0a5858;
+            background: #e8f9f9;
+            border: 2px solid #1fc8c8;
+            border-radius: 10px 10px 0 0;
+            padding: 12px 16px;
+            margin-bottom: 0;
+        }
+        .media-type-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            margin-bottom: 20px;
+            border: 2px solid #1fc8c8;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            overflow: hidden;
+        }
+        .media-type-card {
+            padding: 16px 14px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .video-card {
+            background: #f0f7ff;
+            border-right: 1px solid #1fc8c8;
+        }
+        .photo-card {
+            background: #f0fff4;
+        }
+        .media-type-icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+        .media-type-label {
+            font-size: 14px;
+            font-weight: 800;
+            color: #1fc8c8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .media-type-desc {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* ── Evidence tip banner ── */
+        .evidence-tip {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #f0ad4e;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+        }
+        .evidence-tip .tip-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #856404;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .evidence-tip .tip-body {
+            font-size: 13px;
+            color: #6d4c00;
+            line-height: 1.6;
+        }
+        .evidence-tip .tip-items {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .tip-item {
+            background: rgba(255,255,255,0.7);
+            border: 1px solid #f0ad4e;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6d4c00;
+        }
+        .tip-toggle {
+            background: none; border: none;
+            color: #856404; font-size: 12px;
+            font-weight: 700; cursor: pointer;
+            margin-top: 8px; text-decoration: underline;
+            padding: 0;
+        }
+
+
+
+        /* ── Notes ── */
+        .notes-area { margin-bottom: 20px; }
+        .notes-area label { display:block; font-weight:700; color:#333; margin-bottom:8px; font-size:14px; }
+        .notes-area textarea {
+            width:100%; padding:12px; border:2px solid #ddd; border-radius:8px;
+            font-size:15px; min-height:80px; font-family:inherit; resize:vertical;
+        }
+        .notes-area textarea:focus { outline:none; border-color:#1fc8c8; }
+
+        /* ── Add pair button ── */
+        .add-pair-btn {
+            width:100%; padding:16px;
+            background: linear-gradient(180deg, #24d9d9 0%, #14a8a8 100%);
+            color:white; border:none; border-radius:12px;
+            font-size:17px; font-weight:800; cursor:pointer;
+            margin-bottom:20px;
+            box-shadow: 0 6px 0 #0d7a7a, 0 8px 16px rgba(0,0,0,0.25);
+            transition: all 0.1s ease;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .add-pair-btn:hover {
+            background: linear-gradient(180deg, #28e0e0 0%, #18b8b8 100%);
+            box-shadow: 0 7px 0 #0d7a7a, 0 10px 20px rgba(0,0,0,0.25);
+            transform: translateY(-1px);
+        }
+        .add-pair-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0d7a7a, 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* ── Pair card ── */
+        .pairs-list { display:flex; flex-direction:column; gap:16px; }
+        .pair-card { border:2px solid #e9ecef; border-radius:12px; overflow:hidden; }
+        .pair-card-header {
+            background:#f8f9fa; padding:10px 16px;
+            display:flex; justify-content:space-between; align-items:center;
+            border-bottom:1px solid #e9ecef;
+        }
+        .pair-number { font-weight:700; color:#333; font-size:14px; }
+        .pair-remove { background:none; border:none; color:#f45c43; font-size:18px; cursor:pointer; padding:2px 6px; }
+
+        .pair-columns { display:grid; grid-template-columns:1fr 1fr; }
+        .photo-col { padding:14px; }
+        .photo-col:first-child { border-right:2px solid #e9ecef; }
+
+        .col-label {
+            font-size:12px; font-weight:800; text-transform:uppercase;
+            letter-spacing:1px; margin-bottom:10px;
+            display:flex; align-items:center; gap:6px;
+        }
+        .col-label.before { color:#f0ad4e; }
+        .col-label.after  { color:#5cb85c; }
+
+        /* ── Media slot ── */
+        .media-slot {
+            aspect-ratio:1; border-radius:10px; overflow:hidden;
+            position:relative; margin-bottom:10px;
+            background:#f8f9fa; border:2px dashed #ddd;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition:border-color 0.2s, background 0.2s;
+        }
+        .media-slot:hover { border-color:#1fc8c8; background:#e8f9f9; }
+        .media-slot.has-media { border-style:solid; border-color:#1fc8c8; }
+        .media-slot.before-slot:hover { border-color:#f0ad4e; background:#fff8ec; }
+        .media-slot.after-slot:hover  { border-color:#5cb85c; background:#edfaee; }
+
+        .slot-placeholder {
+            text-align:center; color:#aaa; font-size:12px;
+            padding:8px; pointer-events:none; line-height:1.5;
+        }
+        .slot-placeholder .icon { font-size:28px; display:block; margin-bottom:6px; }
+        .slot-placeholder .media-hint {
+            font-size:10px; color:#bbb; margin-top:4px;
+        }
+
+        .slot-img { width:100%; height:100%; object-fit:cover; display:none; }
+        .slot-video {
+            width:100%; height:100%; object-fit:cover;
+            display:none; background:#000;
+        }
+        .media-slot.has-media .slot-img,
+        .media-slot.has-media .slot-video { display:block; }
+        .media-slot.has-media .slot-placeholder { display:none; }
+
+        .media-type-badge {
+            position:absolute; top:5px; left:5px;
+            background:rgba(0,0,0,0.7); color:white;
+            font-size:10px; font-weight:700;
+            padding:2px 7px; border-radius:10px;
+            display:none;
+        }
+        .media-slot.has-media .media-type-badge { display:block; }
+
+        .slot-timestamp {
+            position:absolute; bottom:0; left:0; right:0;
+            background:rgba(0,0,0,0.65); color:white;
+            font-size:9px; padding:3px 6px; text-align:center; display:none;
+        }
+        .media-slot.has-media .slot-timestamp { display:block; }
+
+        .slot-retake {
+            position:absolute; top:5px; right:5px;
+            background:rgba(0,0,0,0.6); color:white; border:none;
+            border-radius:6px; font-size:10px; padding:3px 7px;
+            cursor:pointer; display:none; font-weight:600;
+        }
+        .media-slot.has-media .slot-retake { display:block; }
+
+        .slot-expand {
+            position:absolute; bottom:22px; right:5px;
+            background:rgba(0,0,0,0.6); color:white; border:none;
+            border-radius:6px; font-size:10px; padding:3px 7px;
+            cursor:pointer; display:none; font-weight:600;
+        }
+        .media-slot.has-media .slot-expand { display:block; }
+
+        .hidden-input { display:none; }
+
+        .tag-section { margin-top:8px; }
+        .tag-section label { font-size:12px; font-weight:700; color:#666; display:block; margin-bottom:5px; }
+        .tag-display { min-height:22px; margin-bottom:5px; }
+        .tag-chip {
+            background:#1fc8c8; color:white;
+            padding:3px 10px; border-radius:12px;
+            font-size:11px; font-weight:700; display:inline-block;
+        }
+        .tag-btn {
+            font-size:11px; padding:4px 10px;
+            border:2px solid #1fc8c8; background:white;
+            color:#1fc8c8; border-radius:6px;
+            cursor:pointer; font-weight:700;
+        }
+
+        .caption-input {
+            width:100%; padding:7px 10px;
+            border:2px solid #ddd; border-radius:8px;
+            font-size:12px; margin-top:7px; font-family:inherit;
+        }
+        .caption-input:focus { outline:none; border-color:#1fc8c8; }
+
+        /* ── Tag modal ── */
+        .tag-modal {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,0.7); z-index:1000;
+            align-items:flex-end; justify-content:center; padding:20px;
+        }
+        .tag-modal.open { display:flex; }
+        .tag-modal-inner {
+            background:white; border-radius:16px;
+            width:100%; max-width:480px; padding:24px;
+            animation:slideUp 0.2s ease;
+        }
+        @keyframes slideUp {
+            from { transform:translateY(40px); opacity:0; }
+            to   { transform:translateY(0);    opacity:1; }
+        }
+        .tag-modal-inner h3 { font-size:18px; margin-bottom:6px; color:#333; text-align:center; }
+        .tag-modal-subtitle { font-size:12px; color:#888; text-align:center; margin-bottom:16px; }
+        .tag-modal-pills {
+            display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;
+        }
+        .tag-modal-pill {
+            padding:12px; border-radius:10px; border:2px solid #e9ecef;
+            background:#f8f9fa; font-size:14px; font-weight:600;
+            cursor:pointer; text-align:center; transition:all 0.15s; color:#444;
+        }
+        .tag-modal-pill:hover { border-color:#1fc8c8; background:#e8f9f9; color:#1fc8c8; }
+        .tag-modal-pill.selected { background:#1fc8c8; border-color:#1fc8c8; color:white; }
+        .tag-modal-other {
+            width:100%; padding:10px 14px; border:2px solid #ddd;
+            border-radius:8px; font-size:14px; margin-bottom:14px;
+            font-family:inherit; display:none;
+        }
+        .tag-modal-other:focus { outline:none; border-color:#1fc8c8; }
+        .tag-modal-confirm {
+            width:100%; padding:14px; background:#1fc8c8;
+            color:white; border:none; border-radius:10px;
+            font-size:16px; font-weight:700; cursor:pointer;
+        }
+
+        /* ── Lightbox ── */
+        .lightbox {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,0.93); z-index:9999;
+            align-items:center; justify-content:center; padding:20px;
+        }
+        .lightbox.open { display:flex; }
+        .lightbox-inner { position:relative; max-width:90vw; text-align:center; }
+        .lightbox img, .lightbox video {
+            max-width:100%; max-height:82vh;
+            border-radius:10px;
+        }
+        .lightbox video { background:#000; }
+        .lightbox-close {
+            position:absolute; top:-16px; right:-16px;
+            background:#f45c43; color:white; border:none;
+            border-radius:50%; width:36px; height:36px;
+            font-size:20px; cursor:pointer; font-weight:700;
+        }
+        .lightbox-meta { color:#ccc; font-size:12px; text-align:center; margin-top:10px; }
+
+        .demo-note {
+            background:#fff3cd; border:1px solid #ffc107;
+            border-radius:8px; padding:12px 16px;
+            font-size:13px; color:#856404;
+            margin-top:20px; text-align:center;
+        }
+
+        @media (max-width:420px) {
+            .pair-columns { grid-template-columns:1fr; }
+            .photo-col:first-child { border-right:none; border-bottom:2px solid #e9ecef; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="preview-label">⚡ PREVIEW — Spring Sparrow Before &amp; After Evidence</div>
+
+    <div class="photo-bucket">
+        <div class="bucket-header">
+            <h2>📸 Before &amp; After Evidence</h2>
+            <span class="count-badge" id="countBadge">0 files</span>
+        </div>
+
+        <div class="bucket-body">
+
+            <!-- Evidence tip -->
+            <div class="evidence-tip">
+                <div class="tip-title">⚠️ Protect Spring Sparrow from False Damage Claims</div>
+                <div class="tip-preview">
+                    We have had situations where we suspect guests may have damaged items or exaggerated minor issues to break their contract. <strong>Your thorough documentation is our best protection.</strong>
+                    <button class="tip-toggle" onclick="toggleTip()" id="tipToggleBtn">Show what to document ▼</button>
+                </div>
+                <div class="tip-body" id="tipBody" style="display:none;">
+                    Take <strong>detailed close-up photos and video</strong> of every item — if a dispute goes to court or arbitration, these timestamps are what protect us. Even if something looks fine, document it. Especially anything with an existing scratch, dent, or mark.
+                    <div class="tip-items" style="margin-top:10px;">
+                        <span class="tip-item">🛏️ Beds & mattresses</span>
+                        <span class="tip-item">🪑 Furniture</span>
+                        <span class="tip-item">🚪 Dressers & drawers</span>
+                        <span class="tip-item">🍳 Stove & oven</span>
+                        <span class="tip-item">🧊 Fridge</span>
+                        <span class="tip-item">🖥️ TV & electronics</span>
+                        <span class="tip-item">🪟 Windows & screens</span>
+                        <span class="tip-item">🌡️ Thermostat</span>
+                        <span class="tip-item">🚿 Bathroom fixtures</span>
+                        <span class="tip-item">🧴 Towel bars & hooks</span>
+                        <span class="tip-item">💡 Light fixtures</span>
+                        <span class="tip-item">🚪 Doors & locks</span>
+                    </div>
+                    <div style="margin-top:10px; padding:10px; background:rgba(255,255,255,0.6); border-radius:8px; font-size:12px; color:#6d4c00;">
+                        💡 <em>In one case, we suspect a guest bent a slightly-bent window screen further and broke the thermostat to claim poor quality — but we had no before photos to protect ourselves. That's why this matters.</em>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Notes -->
+            <div class="notes-area">
+                <label>🗒️ General inspection notes:</label>
+                <textarea id="generalNotes" placeholder="Overall unit condition, issues noticed, anything the property manager should know..."></textarea>
+            </div>
+
+            <!-- Add pair CTA -->
+            <button class="add-pair-btn" onclick="addPair()">
+                ➕ Add Before &amp; After Evidence (Photo or Video)
+            </button>
+
+            <!-- Media type guide — shown below CTA -->
+            <div class="media-info-header">
+                📱 Tap <strong>Add Before &amp; After Evidence</strong> to start — your camera will open for each slot.
+            </div>
+            <div class="media-type-cols">
+                <div class="media-type-card video-card">
+                    <div class="media-type-icon">🎥</div>
+                    <div class="media-type-label">Video</div>
+                    <div class="media-type-desc">Use for room walkthroughs — pan slowly so every corner is captured</div>
+                </div>
+                <div class="media-type-card photo-card">
+                    <div class="media-type-icon">📷</div>
+                    <div class="media-type-label">Close-Up Photo</div>
+                    <div class="media-type-desc">Use for individual items — beds, stove, TV, screens, thermostat</div>
+                </div>
+            </div>
+
+            <!-- Pairs -->
+            <div class="pairs-list" id="pairsList" style="margin-top:20px;"></div>
+
+            <div class="demo-note">
+                🔵 <strong>Preview mode</strong> — files stay local here. In the live app they upload to Firebase Storage with datestamp filenames and are permanently saved.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tag modal -->
+<div class="tag-modal" id="tagModal">
+    <div class="tag-modal-inner">
+        <h3 id="tagModalTitle">📍 Where was this taken?</h3>
+        <p class="tag-modal-subtitle">This helps identify the photo if a dispute comes up</p>
+        <div class="tag-modal-pills" id="tagModalPills"></div>
+        <input class="tag-modal-other" id="tagOtherInput" placeholder="Describe location (e.g. Master Bedroom Closet)...">
+        <button class="tag-modal-confirm" onclick="confirmTag()">✅ Save Location Tag</button>
+    </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightboxOutside(event)">
+    <div class="lightbox-inner">
+        <button class="lightbox-close" onclick="document.getElementById('lightbox').classList.remove('open')">×</button>
+        <img id="lightboxImg" src="" alt="" style="display:none;">
+        <video id="lightboxVideo" controls style="display:none;"></video>
+        <div class="lightbox-meta" id="lightboxMeta"></div>
+    </div>
+</div>
+
+<script>
+    const ROOMS = ['Kitchen','Living Room','Bedroom','Bathroom','Hallway','Exterior','Laundry','Garage','Stove / Oven','Windows & Screens','Thermostat','Other'];
+    let pairs = [];
+    let pairCounter = 0;
+    let pendingTag = { pairId: null, side: null };
+    let selectedTagRoom = null;
+    let tipVisible = false;
+
+    function toggleTip() {
+        tipVisible = !tipVisible;
+        document.getElementById('tipBody').style.display = tipVisible ? 'block' : 'none';
+        document.getElementById('tipToggleBtn').textContent = tipVisible ? 'Hide ▲' : 'Show what to document ▼';
+    }
+
+    function addPair() {
+        pairCounter++;
+        const id = pairCounter;
+        pairs.push({
+            id,
+            label: '',
+            before: { url:null, timestamp:null, tag:null, caption:'', isVideo:false },
+            after:  { url:null, timestamp:null, tag:null, caption:'', isVideo:false }
+        });
+        renderPairs();
+    }
+
+    function removePair(id) {
+        pairs = pairs.filter(p => p.id !== id);
+        renderPairs();
+        updateCount();
+    }
+
+    function renderPairs() {
+        document.querySelectorAll('.pair-card').forEach(el => el.remove());
+        const list = document.getElementById('pairsList');
+        pairs.forEach(pair => {
+            const card = document.createElement('div');
+            card.className = 'pair-card';
+            card.id = `pair-${pair.id}`;
+            card.innerHTML = `
+                <div class="pair-card-header">
+                    <span class="pair-number">📋 Evidence Pair #${pair.id}</span>
+                    <button class="pair-remove" onclick="removePair(${pair.id})">🗑</button>
+                </div>
+                <div class="pair-columns">
+                    ${renderCol(pair, 'before')}
+                    ${renderCol(pair, 'after')}
+                </div>
+            `;
+            list.appendChild(card);
+
+            ['before','after'].forEach(side => {
+                const input = card.querySelector(`#input-${pair.id}-${side}`);
+                input.addEventListener('change', e => handleFile(e, pair.id, side));
+            });
+        });
+    }
+
+    function renderCol(pair, side) {
+        const d = pair[side];
+        const isBefore = side === 'before';
+        const labelText = isBefore ? '🟡 BEFORE' : '🟢 AFTER';
+        const labelClass = isBefore ? 'before' : 'after';
+        const slotClass = isBefore ? 'before-slot' : 'after-slot';
+        const mediaTypeBadge = d.isVideo ? '🎥 VIDEO' : '📷 PHOTO';
+        const tagChip = d.tag
+            ? `<span class="tag-chip">📍 ${d.tag}</span>`
+            : `<span style="color:#bbb; font-size:11px;">No tag yet</span>`;
+        const tagBtnLabel = d.url ? (d.tag ? '✏️ Change' : '➕ Tag Location') : '';
+
+        return `
+            <div class="photo-col">
+                <div class="col-label ${labelClass}">${labelText}</div>
+                <div class="media-slot ${slotClass} ${d.url ? 'has-media' : ''}"
+                     onclick="slotClick(${pair.id},'${side}')">
+                    <div class="slot-placeholder">
+                        <span class="icon">${isBefore ? '📷' : '✅'}</span>
+                        Tap to take<br><strong>${isBefore ? 'BEFORE' : 'AFTER'}</strong><br>photo or video
+                        <div class="media-hint">Photo or Video accepted</div>
+                    </div>
+                    ${d.isVideo
+                        ? `<video class="slot-video" src="${d.url||''}" muted playsinline></video>`
+                        : `<img class="slot-img" src="${d.url||''}" alt="">`
+                    }
+                    <div class="media-type-badge">${mediaTypeBadge}</div>
+                    <div class="slot-timestamp">${d.timestamp||''}</div>
+                    <button class="slot-retake" onclick="retake(event,${pair.id},'${side}')">↺ Retake</button>
+                    <button class="slot-expand" onclick="expand(event,${pair.id},'${side}')">⤢ View</button>
+                </div>
+                <input type="file" accept="image/*,video/*" capture="environment"
+                       class="hidden-input" id="input-${pair.id}-${side}">
+                <div class="tag-section">
+                    <label>📍 Location:</label>
+                    <div class="tag-display">${tagChip}</div>
+                    ${d.url ? `<button class="tag-btn" onclick="openTagModal(${pair.id},'${side}')">${tagBtnLabel}</button>` : ''}
+                </div>
+                <input type="text" class="caption-input"
+                       placeholder="Caption — e.g. Small scratch on left leg..."
+                       value="${d.caption||''}"
+                       oninput="updateCaption(${pair.id},'${side}',this.value)"
+                       style="${d.url ? '' : 'display:none'}">
+            </div>
+        `;
+    }
+
+    function slotClick(pairId, side) {
+        const pair = pairs.find(p => p.id === pairId);
+        if (pair[side].url) return;
+        document.getElementById(`input-${pairId}-${side}`).click();
+    }
+
+    function retake(event, pairId, side) {
+        event.stopPropagation();
+        document.getElementById(`input-${pairId}-${side}`).click();
+    }
+
+    function handleFile(event, pairId, side) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const isVideo = file.type.startsWith('video/');
+        const url = URL.createObjectURL(file);
+        const now = new Date();
+        const ts = now.toLocaleString('en-US', {
+            month:'short', day:'numeric',
+            hour:'2-digit', minute:'2-digit', second:'2-digit'
+        });
+        const pair = pairs.find(p => p.id === pairId);
+        pair[side].url = url;
+        pair[side].timestamp = ts;
+        pair[side].isVideo = isVideo;
+        renderPairs();
+        updateCount();
+        // Auto-open tag modal
+        openTagModal(pairId, side);
+        event.target.value = '';
+    }
+
+    function updateCaption(pairId, side, value) {
+        const pair = pairs.find(p => p.id === pairId);
+        if (pair) pair[side].caption = value;
+    }
+
+    // ── Tag modal ──
+    function openTagModal(pairId, side) {
+        pendingTag = { pairId, side };
+        selectedTagRoom = null;
+        const pair = pairs.find(p => p.id === pairId);
+        const existing = pair ? pair[side].tag : null;
+        const isVideo = pair ? pair[side].isVideo : false;
+
+        document.getElementById('tagModalTitle').textContent =
+            `📍 Where is this ${side === 'before' ? 'BEFORE' : 'AFTER'} ${isVideo ? 'video' : 'photo'}?`;
+
+        const pillsEl = document.getElementById('tagModalPills');
+        pillsEl.innerHTML = '';
+        ROOMS.forEach(room => {
+            const pill = document.createElement('div');
+            pill.className = 'tag-modal-pill' + (existing === room ? ' selected' : '');
+            pill.textContent = room;
+            pill.onclick = () => selectRoom(room, pill);
+            pillsEl.appendChild(pill);
+        });
+
+        const otherInput = document.getElementById('tagOtherInput');
+        if (existing && !ROOMS.slice(0,-1).includes(existing)) {
+            otherInput.style.display = 'block';
+            otherInput.value = existing;
+            selectedTagRoom = 'Other';
+        } else {
+            otherInput.style.display = 'none';
+            otherInput.value = '';
+            selectedTagRoom = existing || null;
+        }
+
+        document.getElementById('tagModal').classList.add('open');
+    }
+
+    function selectRoom(room, pill) {
+        selectedTagRoom = room;
+        document.querySelectorAll('.tag-modal-pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+        const other = document.getElementById('tagOtherInput');
+        other.style.display = room === 'Other' ? 'block' : 'none';
+        if (room !== 'Other') other.value = '';
+    }
+
+    function confirmTag() {
+        if (!selectedTagRoom) { alert('Please select a location first.'); return; }
+        const other = document.getElementById('tagOtherInput');
+        const finalTag = selectedTagRoom === 'Other'
+            ? (other.value.trim() || 'Other') : selectedTagRoom;
+        const pair = pairs.find(p => p.id === pendingTag.pairId);
+        if (pair) pair[pendingTag.side].tag = finalTag;
+        document.getElementById('tagModal').classList.remove('open');
+        renderPairs();
+    }
+
+    // ── Lightbox ──
+    function expand(event, pairId, side) {
+        event.stopPropagation();
+        const pair = pairs.find(p => p.id === pairId);
+        const d = pair[side];
+        if (!d.url) return;
+        const img = document.getElementById('lightboxImg');
+        const vid = document.getElementById('lightboxVideo');
+        if (d.isVideo) {
+            img.style.display = 'none';
+            vid.style.display = 'block';
+            vid.src = d.url;
+        } else {
+            vid.style.display = 'none';
+            img.style.display = 'block';
+            img.src = d.url;
+        }
+        document.getElementById('lightboxMeta').textContent =
+            `${side === 'before' ? '🟡 BEFORE' : '🟢 AFTER'}  •  📍 ${d.tag||'Untagged'}  •  🕐 ${d.timestamp}  •  ${d.isVideo ? '🎥 Video' : '📷 Photo'}`;
+        document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLightboxOutside(e) {
+        if (e.target === document.getElementById('lightbox')) {
+            document.getElementById('lightboxVideo').pause();
+            document.getElementById('lightbox').classList.remove('open');
+        }
+    }
+
+    function updateCount() {
+        let count = 0;
+        pairs.forEach(p => {
+            if (p.before.url) count++;
+            if (p.after.url) count++;
+        });
+        document.getElementById('countBadge').textContent =
+            count === 1 ? '1 file' : `${count} files`;
+    }
+</script>
+</body>
+</html>
