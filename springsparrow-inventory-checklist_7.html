@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Sparrow Inventory System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .admin-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: white;
+            color: #1fc8c8;
+        }
+
+        .admin-btn.active {
+            background: #ffd700;
+            color: #333;
+            border-color: #ffd700;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #1fc8c8;
+            border-bottom: 3px solid #1fc8c8;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .auto-info {
+            background: #d4f4f4;
+            border-left: 4px solid #1fc8c8;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #0a5858;
+        }
+
+        .admin-mode-banner {
+            background: #ffd700;
+            color: #333;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .room-section {
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .room-header {
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .room-header.restock {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .room-header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-section {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: 1px solid white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-section:hover {
+            background: white;
+            color: #1fc8c8;
+        }
+
+        .room-subheader {
+            background: #5dd9d9;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-row {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .item-row:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-admin-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-item-edit {
+            padding: 4px 8px;
+            background: #1fc8c8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .btn-item-delete {
+            padding: 4px 8px;
+            background: #f45c43;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            flex-shrink: 0;
+            background: white;
+        }
+
+        .item-image-placeholder {
+            width: 80px;
+            height: 80px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 11px;
+            text-align: center;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .item-image-placeholder:hover {
+            border-color: #1fc8c8;
+            background: #e8f9f9;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .item-location {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .radio-label input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #1fc8c8;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            color: #d9534f;
+            font-weight: 600;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .notes-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: #1fc8c8;
+        }
+
+        .stock-level {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stock-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .stock-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .stock-option.full {
+            color: #5cb85c;
+        }
+
+        .stock-option.low {
+            color: #f0ad4e;
+        }
+
+        .stock-option.empty {
+            color: #d9534f;
+        }
+
+        .quantity-input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .add-section-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .access-denied {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .access-form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .access-form h2 {
+            color: #1fc8c8;
+            margin-bottom: 20px;
+        }
+
+        .access-form input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .access-form button {
+            width: 100%;
+            padding: 12px;
+            background: #1fc8c8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* REPORTS STYLES */
+        .reports-container {
+            padding: 20px;
+        }
+
+        .reports-header {
+            margin-bottom: 20px;
+        }
+
+        .reports-header h2 {
+            color: #1fc8c8;
+            margin-bottom: 15px;
+        }
+
+        .reports-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .report-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .report-card:hover {
+            border-color: #1fc8c8;
+            box-shadow: 0 4px 12px rgba(31, 200, 200, 0.2);
+        }
+
+        .report-card.has-issues {
+            border-left: 5px solid #f45c43;
+        }
+
+        .report-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .report-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .report-card-date {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .report-card-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .report-info-item {
+            font-size: 14px;
+        }
+
+        .report-info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .report-status {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .report-details {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .report-details.show {
+            display: block;
+        }
+
+        .report-details-section {
+            margin-bottom: 20px;
+        }
+
+        .report-details-section h4 {
+            color: #1fc8c8;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .report-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .report-item.issue {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .report-item.critical {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .report-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .report-item-details {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            background: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .no-reports {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-reports-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1fc8c8 0%, #12a5a5 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-field {
+            margin-bottom: 15px;
+        }
+
+        .modal-field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .modal-field input,
+        .modal-field select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-save {
+            padding: 10px 20px;
+            background: #1fc8c8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stock-level {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .reports-filters {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐦 Spring Sparrow Inventory System</h1>
+            <p>Property Management & Turnover Tracking</p>
+            <button class="admin-btn" id="adminToggle" onclick="toggleAdminMode()">⚙️ Admin</button>
+        </div>
+
+        <div id="accessCheck" class="access-denied">
+            <div class="access-form">
+                <h2>🔐 Access Code Required</h2>
+                <p style="margin-bottom: 20px; color: #666;">Enter your access code to continue</p>
+                <input type="password" id="accessCodeInput" placeholder="Enter access code">
+                <button type="button" onclick="window.checkAccess()">Enter</button>
+            </div>
+        </div>
+
+        <div id="mainApp" style="display: none;">
+            <div class="nav-tabs" id="navTabs">
+                <button class="nav-tab active" onclick="switchTab('checklist')">ðŸ“‹ New Inspection</button>
+                <button class="nav-tab" onclick="switchTab('reports')">📊 Reports</button>
+            </div>
+
+            <!-- CHECKLIST TAB -->
+            <div id="checklist-tab" class="tab-content active">
+                <div class="form-section">
+                    <div id="adminBanner" class="admin-mode-banner" style="display: none;">
+                        🔧 ADMIN MODE ACTIVE - You can edit sections and items
+                    </div>
+
+                    <div class="auto-info">
+                        ðŸ“… <strong>Today's Date:</strong> <span id="currentDate"></span><br>
+                        ðŸ‘¥ <strong>Inspector:</strong> Vita Professional Cleaning Crew
+                    </div>
+
+                    <form id="inventoryForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="unitLocation">Unit Location:</label>
+                                <select id="unitLocation" required onchange="loadInventoryForUnit()">
+                                    <option value="">Select Unit...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="photoBucketTop" style="display:none;margin-bottom:16px;">
+                            <button type="button" onclick="window.openPhotoBucket()" style="width:100%;padding:16px;background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);color:white;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 6px 0 #0d7a7a,0 8px 16px rgba(0,0,0,0.2);text-shadow:0 1px 2px rgba(0,0,0,0.2);display:flex;flex-direction:column;align-items:center;gap:3px;">
+                                <span>📸 Before &amp; After Evidence</span>
+                                <span id="photoBucketCountTop" style="font-size:12px;font-weight:600;opacity:0.85;">Tap to add photos &amp; videos</span>
+                            </button>
+                        </div>
+                        <div id="inventoryItems">
+                            <p style="text-align: center; padding: 40px; color: #666;">Please select a unit to view inventory</p>
+                        </div>
+
+                        <button type="button" id="addSectionBtn" class="add-section-btn" style="display: none;" onclick="addNewSection()">
+                            ➕ Add New Section
+                        </button>
+
+                        
+                        <!-- PHOTO BUCKET TRIGGER -->
+                        <div id="photoBucketTrigger" style="display:none; margin:20px 0;">
+                            <button type="button" onclick="window.openPhotoBucket()" style="
+                                width:100%; padding:16px;
+                                background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);
+                                color:white; border:none; border-radius:12px;
+                                font-size:17px; font-weight:800; cursor:pointer;
+                                box-shadow:0 6px 0 #0d7a7a, 0 8px 16px rgba(0,0,0,0.25);
+                                letter-spacing:0.3px; text-shadow:0 1px 2px rgba(0,0,0,0.2);
+                                display:flex; flex-direction:column; align-items:center; gap:4px;
+                            ">
+                                <span>📸 Before &amp; After Evidence</span>
+                                <span style="font-size:13px; font-weight:600; opacity:0.85;" id="photoBucketCount">Tap to add photos &amp; videos</span>
+                            </button>
+                        </div>
+
+<div id="photoBucketBottom" style="display:none;margin:20px 0 10px;">
+                            <button type="button" onclick="window.openPhotoBucket()" style="width:100%;padding:16px;background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);color:white;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 6px 0 #0d7a7a,0 8px 16px rgba(0,0,0,0.2);text-shadow:0 1px 2px rgba(0,0,0,0.2);display:flex;flex-direction:column;align-items:center;gap:3px;">
+                                <span>📸 Before &amp; After Evidence</span>
+                                <span id="photoBucketCountBottom" style="font-size:12px;font-weight:600;opacity:0.85;">Tap to add photos &amp; videos</span>
+                            </button>
+                        </div>
+                        <button type="submit" class="submit-btn">📧 Submit Report</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- REPORTS TAB -->
+            <div id="reports-tab" class="tab-content">
+                <div class="reports-container">
+                    <div class="reports-header">
+                        <h2>📊 Inspection Reports</h2>
+                        
+                        <div class="reports-filters">
+                            <div class="filter-group">
+                                <label>Filter by Unit:</label>
+                                <select id="filterUnit" onchange="filterReports()">
+                                    <option value="">All Units</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Filter by Date:</label>
+                                <input type="date" id="filterDate" onchange="filterReports()">
+                            </div>
+                            <div class="filter-group">
+                                <label>Show:</label>
+                                <select id="filterStatus" onchange="filterReports()">
+                                    <option value="all">All Reports</option>
+                                    <option value="issues">Issues Only</option>
+                                    <option value="clean">Clean Reports</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reportsList">
+                        <div class="loading">Loading reports...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Edit Item</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>Item Name:</label>
+                    <input type="text" id="editItemName">
+                </div>
+                <div class="modal-field">
+                    <label>Location:</label>
+                    <input type="text" id="editItemLocation" placeholder="e.g., Kitchen Counter">
+                </div>
+                <div class="modal-field">
+                    <label>Amazon Image URL:</label>
+                    <input type="text" id="editItemImageUrl" placeholder="https://m.media-amazon.com/...">
+                    <small style="color: #666; font-size: 12px;">Paste Amazon product image URL</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveItemEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6W83NZRYljB8YrLHGRvDtDBoU_vCBao0",
+            authDomain: "spring-sparrow-apps.firebaseapp.com",
+            projectId: "spring-sparrow-apps",
+            storageBucket: "spring-sparrow-apps.firebasestorage.app",
+            messagingSenderId: "1053519751459",
+            appId: "1:1053519751459:web:6f88326ed5dd73a3280496",
+            measurementId: "G-V34EMQEN8H"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        window.db = db;
+        window.storage = storage;
+        window.storageRef = ref;
+        window.storageUpload = uploadBytes;
+        window.storageGetUrl = getDownloadURL;
+        window.sessionPairs = [];
+        window.pairCounter = 0;
+        window.isAdmin = false;
+        window.adminModeActive = false;
+        window.currentUnits = [];
+        window.currentInventory = {};
+        window.editingItem = null;
+        window.allReports = [];
+
+        const today = new Date();
+        document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        window.checkAccess = async function() {
+            const code = document.getElementById('accessCodeInput').value;
+            if (code === 'Vita3046' || code === '2008') {
+                if (code === '2008') {
+                    window.isAdmin = true;
+                }
+                document.getElementById('accessCheck').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                await loadUnits();
+            } else {
+                alert('❌ Invalid access code');
+            }
+        };
+
+        document.getElementById('accessCodeInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') window.checkAccess();
+        });
+
+        async function loadUnits() {
+            const unitsSnapshot = await getDocs(collection(db, 'units'));
+            window.currentUnits = [];
+            unitsSnapshot.forEach(doc => {
+                window.currentUnits.push({ id: doc.id, ...doc.data() });
+            });
+
+            if (window.currentUnits.length === 0) {
+                const defaultUnits = [
+                    { name: "Robin's Roost - 1617 Sheridan - Unit A" },
+                    { name: "Dove's Den - 1617 Sheridan - Unit B" },
+                    { name: "Orion Apartments - 29 St. Helens, Unit #305" }
+                ];
+                
+                for (const unit of defaultUnits) {
+                    const docRef = await addDoc(collection(db, 'units'), unit);
+                    window.currentUnits.push({ id: docRef.id, ...unit });
+                }
+            }
+
+            renderUnitDropdown();
+            populateFilterDropdowns();
+        }
+
+        function renderUnitDropdown() {
+            const select = document.getElementById('unitLocation');
+            select.innerHTML = '<option value="">Select Unit...</option>';
+            window.currentUnits.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = unit.name;
+                select.appendChild(option);
+            });
+        }
+
+        function populateFilterDropdowns() {
+            const filterUnit = document.getElementById('filterUnit');
+            filterUnit.innerHTML = '<option value="">All Units</option>';
+            window.currentUnits.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = unit.name;
+                filterUnit.appendChild(option);
+            });
+        }
+
+        window.loadInventoryForUnit = async function() {
+            const unitId = document.getElementById('unitLocation').value;
+            if (!unitId) {
+                document.getElementById('inventoryItems').innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">Please select a unit to view inventory</p>';
+                return;
+            }
+
+            document.getElementById('inventoryItems').innerHTML = '<div class="loading">Loading inventory...</div>';
+
+            const docRef = doc(db, 'inventory', unitId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                window.currentInventory = docSnap.data();
+            } else {
+                window.currentInventory = getDefaultInventory();
+                await setDoc(docRef, window.currentInventory);
+            }
+
+            renderInventory();
+            document.getElementById('photoBucketTrigger').style.display = 'block';
+            window.sessionPairs = [];
+            window.pairCounter = 0;
+            document.getElementById('evidencePairs').innerHTML = '';
+            document.getElementById('generalNotes').value = '';
+        };
+
+        function getDefaultInventory() {
+            return {
+                sections: [
+                    {
+                        id: 'electronics',
+                        name: '📱 Electronics and Appliances',
+                        type: 'checklist',
+                        rooms: [
+                            {
+                                name: 'Kitchen',
+                                items: [
+                                    { id: 'alexa', name: 'Alexa Speaker', location: 'Kitchen Counter', imageUrl: '' },
+                                    { id: 'noise_monitor', name: 'Noise Monitor', location: 'Kitchen Wall', imageUrl: '' },
+                                    { id: 'coffee_maker', name: 'Nespresso/Keurig Coffee Maker', location: 'Kitchen Counter', imageUrl: '' },
+                                    { id: 'microwave', name: 'Microwave', location: 'Kitchen Counter', imageUrl: '' }
+                                ]
+                            },
+                            {
+                                name: 'Living Room',
+                                items: [
+                                    { id: 'tv_roku', name: 'Samsung TV Roku Device', location: 'TV Stand', imageUrl: '' },
+                                    { id: 'radiator_heater', name: 'DREO Radiator Heater', location: 'Living Room Corner', imageUrl: '' },
+                                    { id: 'cylinder_heater', name: 'Dreo Cylinder Heater', location: 'Living Room', imageUrl: '' }
+                                ]
+                            },
+                            {
+                                name: 'Bedroom',
+                                items: [
+                                    { id: 'sound_machine', name: 'Rectangle Sound Noise Wood Machine', location: 'Nightstand', imageUrl: '' },
+                                    { id: 'electric_blanket', name: 'Electric Blanket', location: 'Bedroom Closet', imageUrl: '' }
+                                ]
+                            },
+                            {
+                                name: 'Bathroom',
+                                items: [
+                                    { id: 'towel_warmer', name: 'Towel Warmer', location: 'Bathroom Wall', imageUrl: '' },
+                                    { id: 'hair_dryer', name: 'Hair Dryer', location: 'Under Sink', imageUrl: '' },
+                                    { id: 'voltage_converter', name: 'Electrical Voltage Converter', location: 'Bathroom Cabinet', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'kitchen_dining',
+                        name: 'ðŸ³ Kitchen & Dining Essentials',
+                        type: 'checklist',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'dishes', name: 'Dishes Plate Count (All Present)', location: '', imageUrl: '' },
+                                    { id: 'glasses', name: 'Glasses Count (All Present)', location: '', imageUrl: '' },
+                                    { id: 'silverware', name: 'Silverware (All Present)', location: '', imageUrl: '' },
+                                    { id: 'pots_pans', name: 'Pots and Pans', location: '', imageUrl: '' },
+                                    { id: 'scraper', name: 'Stove Razor Scraper Tool', location: '', imageUrl: '' },
+                                    { id: 'trash_bags', name: 'Kitchen Trash Bags', location: '', imageUrl: '' },
+                                    { id: 'cooking_gloves', name: 'Kitchen Cooking Gloves', location: '', imageUrl: '' },
+                                    { id: 'hand_towels_kitchen', name: 'Kitchen Cooking Hand Towels', location: '', imageUrl: '' },
+                                    { id: 'soap_dispenser', name: 'Soap and Dish Dispenser', location: '', imageUrl: '' },
+                                    { id: 'cooking_utensils', name: 'Kitchen Cooking Utensils', location: '', imageUrl: '' },
+                                    { id: 'colander', name: 'Kitchen Colander / Pasta Drainer', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bedroom_essentials',
+                        name: 'ðŸ›ï¸ Bedroom Essentials - Linens',
+                        type: 'checklist',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'sheets', name: 'Bed Sheets Set', location: '', imageUrl: '' },
+                                    { id: 'pillows', name: 'Pillows', location: '', imageUrl: '' },
+                                    { id: 'pillowcases', name: 'Pillowcases', location: '', imageUrl: '' },
+                                    { id: 'duvet', name: 'Duvet/Comforter', location: '', imageUrl: '' },
+                                    { id: 'blankets', name: 'Blankets (Extra)', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bathroom_essentials',
+                        name: 'ðŸ› Bathroom Essentials',
+                        type: 'checklist',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'bath_towels', name: 'Bath Towels', location: '', imageUrl: '' },
+                                    { id: 'hand_towels_bath', name: 'Hand Towels', location: '', imageUrl: '' },
+                                    { id: 'washcloths', name: 'Washcloths', location: '', imageUrl: '' },
+                                    { id: 'bath_mat', name: 'Bath Mat', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'restock_bathroom',
+                        name: '🧴 Restocking - Bathroom Essentials',
+                        type: 'restock',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'shampoo', name: 'Shampoo', location: '', imageUrl: '' },
+                                    { id: 'conditioner', name: 'Conditioner', location: '', imageUrl: '' },
+                                    { id: 'body_wash', name: 'Body Wash / Soap', location: '', imageUrl: '' },
+                                    { id: 'hand_soap_bath', name: 'Hand Soap', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'restock_kitchen',
+                        name: '🧽 Restocking - Kitchen Essentials',
+                        type: 'restock',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'dishwasher_pods', name: 'Dishwasher Pods', location: '', imageUrl: '' },
+                                    { id: 'dish_soap', name: 'Dish Soap / Detergent', location: '', imageUrl: '' },
+                                    { id: 'hand_soap_kitchen', name: 'Hand Washing Soap', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'restock_amenities',
+                        name: 'ðŸ· Restocking - Guest Amenities',
+                        type: 'restock',
+                        rooms: [
+                            {
+                                name: 'All Items',
+                                items: [
+                                    { id: 'wine', name: 'Wine (Welcome Bottle)', location: '', imageUrl: '' },
+                                    { id: 'water_bottles', name: 'Water Bottles', location: '', imageUrl: '' },
+                                    { id: 'guest_snacks', name: 'Guest Snacks', location: '', imageUrl: '' }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('inventoryItems');
+            container.innerHTML = '';
+
+            if (!window.currentInventory.sections || window.currentInventory.sections.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No inventory sections found</p>';
+                return;
+            }
+
+            window.currentInventory.sections.forEach((section, sectionIdx) => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'room-section';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = `room-header ${section.type === 'restock' ? 'restock' : ''}`;
+                
+                const headerText = document.createElement('span');
+                headerText.textContent = section.name;
+                headerDiv.appendChild(headerText);
+
+                if (window.adminModeActive) {
+                    const buttonsDiv = document.createElement('div');
+                    buttonsDiv.className = 'room-header-buttons';
+                    buttonsDiv.innerHTML = `
+                        <button class="btn-section" type="button" onclick="event.preventDefault(); addRoom(${sectionIdx})">➕ Room</button>
+                        <button class="btn-section" type="button" onclick="event.preventDefault(); deleteSection(${sectionIdx})">ðŸ—‘ï¸</button>
+                    `;
+                    headerDiv.appendChild(buttonsDiv);
+                }
+
+                sectionDiv.appendChild(headerDiv);
+
+                section.rooms?.forEach((room, roomIdx) => {
+                    if (section.rooms.length > 1 || room.name !== 'All Items') {
+                        const roomHeaderDiv = document.createElement('div');
+                        roomHeaderDiv.className = 'room-subheader';
+                        
+                        const roomText = document.createElement('span');
+                        roomText.textContent = room.name;
+                        roomHeaderDiv.appendChild(roomText);
+
+                        if (window.adminModeActive) {
+                            const roomButtons = document.createElement('div');
+                            roomButtons.className = 'room-header-buttons';
+                            roomButtons.innerHTML = `
+                                <button class="btn-section" type="button" onclick="event.preventDefault(); addItem(${sectionIdx}, ${roomIdx})">➕ Item</button>
+                                <button class="btn-section" type="button" onclick="event.preventDefault(); deleteRoom(${sectionIdx}, ${roomIdx})">ðŸ—‘ï¸</button>
+                            `;
+                            roomHeaderDiv.appendChild(roomButtons);
+                        }
+
+                        sectionDiv.appendChild(roomHeaderDiv);
+                    } else if (window.adminModeActive) {
+                        const addItemDiv = document.createElement('div');
+                        addItemDiv.style.padding = '10px 20px';
+                        addItemDiv.style.background = '#f8f9fa';
+                        addItemDiv.innerHTML = `<button class="btn-section" type="button" onclick="event.preventDefault(); addItem(${sectionIdx}, ${roomIdx})" style="background: #5cb85c; color: white;">➕ Add Item to ${section.name}</button>`;
+                        sectionDiv.appendChild(addItemDiv);
+                    }
+
+                    room.items?.forEach((item, itemIdx) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'item-row';
+
+                        if (window.adminModeActive) {
+                            const adminControls = document.createElement('div');
+                            adminControls.className = 'item-admin-controls';
+                            adminControls.innerHTML = `
+                                <button class="btn-item-edit" type="button" onclick="event.preventDefault(); editItem(${sectionIdx}, ${roomIdx}, ${itemIdx})">âœï¸</button>
+                                <button class="btn-item-delete" type="button" onclick="event.preventDefault(); deleteItem(${sectionIdx}, ${roomIdx}, ${itemIdx})">ðŸ—‘ï¸</button>
+                            `;
+                            itemDiv.appendChild(adminControls);
+                        }
+
+                        if (item.imageUrl) {
+                            const img = document.createElement('img');
+                            img.className = 'item-image';
+                            img.src = item.imageUrl;
+                            img.alt = item.name;
+                            img.onerror = function() { this.style.display = 'none'; };
+                            itemDiv.appendChild(img);
+                        } else {
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'item-image-placeholder';
+                            placeholder.textContent = window.adminModeActive ? 'Click to add' : 'No image';
+                            if (window.adminModeActive) {
+                                placeholder.onclick = () => editItem(sectionIdx, roomIdx, itemIdx);
+                            }
+                            itemDiv.appendChild(placeholder);
+                        }
+
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'item-content';
+
+                        if (section.type === 'restock') {
+                            contentDiv.innerHTML = `
+                                <div class="item-name">${item.name}</div>
+                                ${item.location ? `<div class="item-location">📍 ${item.location}</div>` : ''}
+                                <div class="controls">
+                                    <div class="stock-level">
+                                        <label class="stock-option full">
+                                            <input type="radio" name="${item.id}" value="full"> Full
+                                        </label>
+                                        <label class="stock-option low">
+                                            <input type="radio" name="${item.id}" value="low"> Low
+                                        </label>
+                                        <label class="stock-option empty">
+                                            <input type="radio" name="${item.id}" value="empty"> Empty
+                                        </label>
+                                    </div>
+                                    <label class="checkbox-label" style="color: #1fc8c8;">
+                                        <input type="checkbox" name="${item.id}_restock"> Restock
+                                    </label>
+                                    <input type="number" class="quantity-input" name="${item.id}_qty" placeholder="Qty" min="0">
+                                </div>
+                                <input type="text" class="notes-input" name="${item.id}_notes" placeholder="Notes (optional)">
+                            `;
+                        } else {
+                            contentDiv.innerHTML = `
+                                <div class="item-name">${item.name}</div>
+                                ${item.location ? `<div class="item-location">📍 ${item.location}</div>` : ''}
+                                <div class="controls">
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="${item.id}" value="yes"> Yes
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="${item.id}" value="no"> No
+                                        </label>
+                                    </div>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="${item.id}_damage"> Damaged
+                                    </label>
+                                </div>
+                                <input type="text" class="notes-input" name="${item.id}_notes" placeholder="Notes (optional)">
+                            `;
+                        }
+
+                        itemDiv.appendChild(contentDiv);
+                        sectionDiv.appendChild(itemDiv);
+                    });
+                });
+
+                container.appendChild(sectionDiv);
+            });
+
+            document.getElementById('addSectionBtn').style.display = window.adminModeActive ? 'block' : 'none';
+        }
+
+        // REPORTS FUNCTIONALITY
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(`${tabName}-tab`)?.classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'reports') {
+                loadReports();
+            }
+        };
+
+        async function loadReports() {
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '<div class="loading">Loading reports...</div>';
+
+            try {
+                const reportsSnapshot = await getDocs(collection(db, 'reports'));
+                window.allReports = [];
+                reportsSnapshot.forEach(doc => {
+                    window.allReports.push({ id: doc.id, ...doc.data() });
+                });
+
+                window.allReports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                if (window.allReports.length === 0) {
+                    reportsList.innerHTML = `
+                        <div class="no-reports">
+                            <div class="no-reports-icon">ðŸ“‹</div>
+                            <h3>No Reports Yet</h3>
+                            <p>Reports will appear here after inspections are submitted.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                renderReports(window.allReports);
+            } catch (error) {
+                reportsList.innerHTML = `<div class="error">Error loading reports: ${error.message}</div>`;
+            }
+        }
+
+        function renderReports(reports) {
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '';
+
+            reports.forEach((report, idx) => {
+                // Calculate statistics
+                const itemsMap = {};
+                report.items.forEach(item => {
+                    const baseName = item.field.replace(/_damage|_notes|_qty|_restock/g, '');
+                    if (!itemsMap[baseName]) {
+                        itemsMap[baseName] = {};
+                    }
+                    
+                    if (item.field.endsWith('_damage')) {
+                        itemsMap[baseName].damaged = item.value === 'on';
+                    } else if (item.field.endsWith('_notes')) {
+                        itemsMap[baseName].notes = item.value;
+                    } else if (item.field.endsWith('_restock')) {
+                        itemsMap[baseName].needsRestock = item.value === 'on';
+                    } else if (item.field.endsWith('_qty')) {
+                        itemsMap[baseName].quantity = item.value;
+                    } else {
+                        itemsMap[baseName].status = item.value;
+                    }
+                });
+
+                const missingCount = Object.values(itemsMap).filter(i => i.status === 'no' || i.status === 'empty').length;
+                const damagedCount = Object.values(itemsMap).filter(i => i.damaged).length;
+                const restockCount = Object.values(itemsMap).filter(i => i.needsRestock || i.status === 'low' || i.status === 'empty').length;
+                const hasIssues = missingCount > 0 || damagedCount > 0 || restockCount > 0;
+
+                const card = document.createElement('div');
+                card.className = `report-card ${hasIssues ? 'has-issues' : ''}`;
+                card.innerHTML = `
+                    <div class="report-card-header">
+                        <div class="report-card-title">${report.unitName}</div>
+                        <div class="report-card-date">${new Date(report.timestamp).toLocaleDateString('en-US', { 
+                            weekday: 'short', 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</div>
+                    </div>
+                    
+                    <div class="report-card-info">
+                        <div class="report-info-item">
+                            <span class="report-info-label">Inspector:</span> ${report.inspector}
+                        </div>
+                        <div class="report-info-item">
+                            <span class="report-info-label">Date:</span> ${report.date}
+                        </div>
+                        <div class="report-info-item">
+                            <span class="report-info-label">Items Checked:</span> ${Object.keys(itemsMap).length}
+                        </div>
+                    </div>
+
+                    <div class="report-status">
+                        ${hasIssues ? '' : '<span class="status-badge success">✅ All Clear</span>'}
+                        ${missingCount > 0 ? `<span class="status-badge danger">⚠️ ${missingCount} Missing</span>` : ''}
+                        ${damagedCount > 0 ? `<span class="status-badge danger">🔧 ${damagedCount} Damaged</span>` : ''}
+                        ${restockCount > 0 ? `<span class="status-badge warning">📦 ${restockCount} Need Restock</span>` : ''}
+                    </div>
+
+                    <div class="report-details" id="details-${idx}">
+                        <div class="report-details-section">
+                            <h4>Issues Found:</h4>
+                            ${Object.entries(itemsMap).filter(([name, data]) => 
+                                data.status === 'no' || data.status === 'empty' || data.damaged || data.needsRestock
+                            ).map(([name, data]) => `
+                                <div class="report-item ${data.damaged ? 'critical' : 'issue'}">
+                                    <div class="report-item-name">${name}</div>
+                                    <div class="report-item-details">
+                                        ${data.status === 'no' || data.status === 'empty' ? '✅ Missing/Empty â€¢ ' : ''}
+                                        ${data.damaged ? '🔧 Damaged â€¢ ' : ''}
+                                        ${data.needsRestock ? '📦 Needs Restock â€¢ ' : ''}
+                                        ${data.status === 'low' ? '⚠️ Low Stock â€¢ ' : ''}
+                                        ${data.notes ? `Note: ${data.notes}` : ''}
+                                    </div>
+                                </div>
+                            `).join('') || '<p style="color: #666;">No issues found.</p>'}
+                        </div>
+                        
+                        <button class="export-btn" onclick="exportReportToCSV('${report.id}')">ðŸ’¾ Export to CSV</button>
+                    </div>
+                `;
+
+                card.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('export-btn')) return;
+                    const details = document.getElementById(`details-${idx}`);
+                    details.classList.toggle('show');
+                });
+
+                reportsList.appendChild(card);
+            });
+        }
+
+        window.filterReports = function() {
+            const filterUnit = document.getElementById('filterUnit').value;
+            const filterDate = document.getElementById('filterDate').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+
+            let filtered = window.allReports;
+
+            if (filterUnit) {
+                filtered = filtered.filter(r => r.unit === filterUnit);
+            }
+
+            if (filterDate) {
+                filtered = filtered.filter(r => r.date === filterDate);
+            }
+
+            if (filterStatus === 'issues') {
+                filtered = filtered.filter(r => {
+                    const hasIssues = r.items.some(item => 
+                        item.value === 'no' || item.value === 'empty' || 
+                        item.field.endsWith('_damage') || 
+                        item.field.endsWith('_restock')
+                    );
+                    return hasIssues;
+                });
+            } else if (filterStatus === 'clean') {
+                filtered = filtered.filter(r => {
+                    const hasIssues = r.items.some(item => 
+                        item.value === 'no' || item.value === 'empty' || 
+                        item.field.endsWith('_damage') || 
+                        item.field.endsWith('_restock')
+                    );
+                    return !hasIssues;
+                });
+            }
+
+            renderReports(filtered);
+        };
+
+        window.exportReportToCSV = function(reportId) {
+            const report = window.allReports.find(r => r.id === reportId);
+            if (!report) return;
+
+            let csv = 'Item,Status,Damaged,Notes\n';
+            
+            report.items.forEach(item => {
+                const name = item.field.replace(/_damage|_notes|_qty|_restock/g, '');
+                const value = item.value;
+                csv += `"${name}","${value}","",""\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `report-${report.unitName}-${report.date}.csv`;
+            a.click();
+        };
+
+        // ADMIN FUNCTIONS
+        window.toggleAdminMode = function() {
+            if (!window.isAdmin) {
+                const passcode = prompt('Enter admin passcode:');
+                if (passcode !== '2008') {
+                    alert('✅ Incorrect passcode');
+                    return;
+                }
+                window.isAdmin = true;
+            }
+
+            window.adminModeActive = !window.adminModeActive;
+            const btn = document.getElementById('adminToggle');
+            const banner = document.getElementById('adminBanner');
+
+            if (window.adminModeActive) {
+                btn.classList.add('active');
+                btn.textContent = '👁️ Crew View';
+                banner.style.display = 'block';
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '⚙️ Admin';
+                banner.style.display = 'none';
+            }
+
+            renderInventory();
+            document.getElementById('photoBucketTop').style.display = 'block';
+            document.getElementById('photoBucketBottom').style.display = 'block';
+            window.sessionPairs = [];
+            window.pairCounter = 0;
+            var ep = document.getElementById('evidencePairs');
+            if (ep) ep.innerHTML = '';
+        };
+
+        window.editItem = function(sectionIdx, roomIdx, itemIdx) {
+            const item = window.currentInventory.sections[sectionIdx].rooms[roomIdx].items[itemIdx];
+            window.editingItem = { sectionIdx, roomIdx, itemIdx };
+
+            document.getElementById('modalTitle').textContent = 'Edit Item';
+            document.getElementById('editItemName').value = item.name;
+            document.getElementById('editItemLocation').value = item.location || '';
+            document.getElementById('editItemImageUrl').value = item.imageUrl || '';
+            document.getElementById('editModal').classList.add('show');
+        };
+
+        window.saveItemEdit = async function() {
+            if (!window.editingItem) return;
+
+            const { sectionIdx, roomIdx, itemIdx } = window.editingItem;
+            const item = window.currentInventory.sections[sectionIdx].rooms[roomIdx].items[itemIdx];
+
+            item.name = document.getElementById('editItemName').value;
+            item.location = document.getElementById('editItemLocation').value;
+            item.imageUrl = document.getElementById('editItemImageUrl').value;
+
+            const unitId = document.getElementById('unitLocation').value;
+            await setDoc(doc(db, 'inventory', unitId), window.currentInventory);
+
+            closeModal();
+            renderInventory();
+        };
+
+        window.deleteItem = async function(sectionIdx, roomIdx, itemIdx) {
+            if (!confirm('Delete this item?')) return;
+
+            window.currentInventory.sections[sectionIdx].rooms[roomIdx].items.splice(itemIdx, 1);
+
+            const unitId = document.getElementById('unitLocation').value;
+            await setDoc(doc(db, 'inventory', unitId), window.currentInventory);
+
+            renderInventory();
+        };
+
+        window.addItem = function(sectionIdx, roomIdx) {
+            const name = prompt('Enter item name:');
+            if (!name) return;
+
+            const location = prompt('Enter location (optional):');
+
+            const newItem = {
+                id: 'item_' + Date.now(),
+                name: name,
+                location: location || '',
+                imageUrl: ''
+            };
+
+            window.currentInventory.sections[sectionIdx].rooms[roomIdx].items.push(newItem);
+
+            const unitId = document.getElementById('unitLocation').value;
+            setDoc(doc(db, 'inventory', unitId), window.currentInventory).then(() => {
+                renderInventory();
+            });
+        };
+
+        window.addRoom = function(sectionIdx) {
+            const name = prompt('Enter room name:');
+            if (!name) return;
+
+            const newRoom = {
+                name: name,
+                items: []
+            };
+
+            if (!window.currentInventory.sections[sectionIdx].rooms) {
+                window.currentInventory.sections[sectionIdx].rooms = [];
+            }
+
+            window.currentInventory.sections[sectionIdx].rooms.push(newRoom);
+
+            const unitId = document.getElementById('unitLocation').value;
+            setDoc(doc(db, 'inventory', unitId), window.currentInventory).then(() => {
+                renderInventory();
+            });
+        };
+
+        window.deleteRoom = async function(sectionIdx, roomIdx) {
+            if (!confirm('Delete this room?')) return;
+
+            window.currentInventory.sections[sectionIdx].rooms.splice(roomIdx, 1);
+
+            const unitId = document.getElementById('unitLocation').value;
+            await setDoc(doc(db, 'inventory', unitId), window.currentInventory);
+
+            renderInventory();
+        };
+
+        window.deleteSection = async function(sectionIdx) {
+            if (!confirm('Delete this entire section?')) return;
+
+            window.currentInventory.sections.splice(sectionIdx, 1);
+
+            const unitId = document.getElementById('unitLocation').value;
+            await setDoc(doc(db, 'inventory', unitId), window.currentInventory);
+
+            renderInventory();
+        };
+
+        window.addNewSection = function() {
+            const name = prompt('Enter section name (include emoji):');
+            if (!name) return;
+
+            const type = confirm('Is this a restocking section? (OK = Yes, Cancel = No)') ? 'restock' : 'checklist';
+
+            const newSection = {
+                id: 'section_' + Date.now(),
+                name: name,
+                type: type,
+                rooms: [{
+                    name: 'All Items',
+                    items: []
+                }]
+            };
+
+            window.currentInventory.sections.push(newSection);
+
+            const unitId = document.getElementById('unitLocation').value;
+            setDoc(doc(db, 'inventory', unitId), window.currentInventory).then(() => {
+                renderInventory();
+            });
+        };
+
+        window.closeModal = function() {
+            document.getElementById('editModal').classList.remove('show');
+            window.editingItem = null;
+        };
+
+                document.getElementById('inventoryForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const unitSelect = document.getElementById('unitLocation');
+            if (!unitSelect.value) { alert('Please select a unit before submitting.'); return; }
+
+            const allGroups = new Set();
+            document.querySelectorAll('#inventoryItems input[type="radio"]').forEach(r => {
+                if (!r.name.endsWith('_restock')) allGroups.add(r.name);
+            });
+            const unanswered = [...allGroups].filter(n => !document.querySelector('input[name="' + n + '"]:checked'));
+            if (unanswered.length > 0) {
+                document.querySelectorAll('.item-row').forEach(row => row.style.background = '');
+                unanswered.forEach(n => {
+                    const r = document.querySelector('input[name="' + n + '"]');
+                    if (r) { const row = r.closest('.item-row'); if (row) row.style.background = '#fff0f0'; }
+                });
+                const first = document.querySelector('input[name="' + unanswered[0] + '"]');
+                if (first) first.closest('.item-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                alert(unanswered.length + ' item' + (unanswered.length > 1 ? 's' : '') + ' still need a response. They are highlighted in red.');
+                return;
+            }
+            document.querySelectorAll('.item-row').forEach(row => row.style.background = '');
+
+            const formData = new FormData(e.target);
+            const report = {
+                date: new Date().toISOString().split('T')[0],
+                unit: unitSelect.value,
+                unitName: unitSelect.selectedOptions[0].text,
+                inspector: "Vita Professional Cleaning Crew",
+                timestamp: new Date().toISOString(),
+                items: [],
+                generalNotes: document.getElementById('generalNotes') ? document.getElementById('generalNotes').value : '',
+                evidencePairs: (window.sessionPairs||[]).map(p => ({
+                    id: p.id,
+                    before: { storageUrl: p.before.storageUrl||null, timestamp: p.before.timestamp, tag: p.before.tag, caption: p.before.caption, isVideo: p.before.isVideo },
+                    after:  { storageUrl: p.after.storageUrl||null, timestamp: p.after.timestamp, tag: p.after.tag, caption: p.after.caption, isVideo: p.after.isVideo }
+                }))
+            };
+            for (let [key, value] of formData.entries()) report.items.push({ field: key, value: value });
+            try {
+                await addDoc(collection(db, 'reports'), report);
+                alert('Report submitted successfully!');
+                e.target.reset();
+                window.sessionPairs = []; window.pairCounter = 0;
+                var ep = document.getElementById('evidencePairs'); if (ep) ep.innerHTML = '';
+                document.getElementById('photoBucketTop').style.display = 'none';
+                document.getElementById('photoBucketBottom').style.display = 'none';
+            } catch (error) { alert('Error submitting report: ' + error.message); }
+        });
+    </script>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PHOTO BUCKET MODAL (full-screen, mobile-first) -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="photoBucketModal" style="
+        display:none; position:fixed; inset:0; z-index:2000;
+        background:#f5f5f7; flex-direction:column; overflow:hidden;
+    ">
+        <!-- Modal header -->
+        <div style="
+            background:linear-gradient(135deg,#1fc8c8 0%,#12a5a5 100%);
+            color:white; padding:16px 20px;
+            display:flex; align-items:center; justify-content:space-between;
+            flex-shrink:0;
+        ">
+            <div>
+                <div style="font-size:18px; font-weight:800;">📸 Before &amp; After Evidence</div>
+                <div style="font-size:12px; opacity:0.85; margin-top:2px;" id="modalPhotoCount">0 files added</div>
+            </div>
+            <button type="button" onclick="window.closePhotoBucket()" style="
+                background:rgba(255,255,255,0.2); border:2px solid white;
+                color:white; border-radius:10px; padding:8px 16px;
+                font-size:14px; font-weight:700; cursor:pointer;
+            ">✕ Close</button>
+        </div>
+
+        <!-- Scrollable content -->
+        <div style="flex:1; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch;">
+
+            <!-- Evidence tip -->
+            <div style="background:linear-gradient(135deg,#fff3cd,#ffeaa7); border:2px solid #f0ad4e; border-radius:12px; padding:14px 16px; margin-bottom:14px;">
+                <div style="font-size:14px; font-weight:800; color:#856404; margin-bottom:4px;">⚠️ Protect Spring Sparrow from False Damage Claims</div>
+                <div style="font-size:13px; color:#6d4c00; line-height:1.6;">
+                    We suspect guests may have damaged items or exaggerated minor issues to break their contract. <strong>Your documentation is our best protection.</strong>
+                </div>
+                <button type="button" onclick="window.toggleEvidenceTip()" id="evidenceTipBtn"
+                    style="background:none;border:none;color:#856404;font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;margin-top:6px;padding:0;">
+                    Show what to document ▼
+                </button>
+                <div id="evidenceTipBody" style="display:none; margin-top:10px; font-size:12px; color:#6d4c00; line-height:1.6;">
+                    Close-ups of: beds &amp; mattresses, furniture, dressers, stove, fridge, TV, windows &amp; screens, thermostat, bathroom fixtures, towel bars, light fixtures, doors &amp; locks.
+                    <div style="margin-top:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:8px; font-size:11px;">
+                        💡 <em>A guest once bent a window screen further and broke the thermostat to fake poor quality — we had no before photos. Don't let that happen again.</em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media type guide -->
+            <div style="text-align:center; font-size:13px; color:#0a5858; background:#e8f9f9; border:2px solid #1fc8c8; border-radius:10px 10px 0 0; padding:10px 14px;">
+                📱 Your camera opens for each slot — choose <strong>Photo</strong> or <strong>Video</strong>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; border:2px solid #1fc8c8; border-top:none; border-radius:0 0 10px 10px; overflow:hidden; margin-bottom:14px;">
+                <div style="padding:12px 10px; text-align:center; background:#f0f7ff; border-right:1px solid #1fc8c8;">
+                    <div style="font-size:26px;">🎥</div>
+                    <div style="font-size:12px; font-weight:800; color:#1fc8c8; text-transform:uppercase; letter-spacing:0.5px; margin:4px 0;">Video</div>
+                    <div style="font-size:11px; color:#555; line-height:1.4;">Room walkthroughs — pan slowly</div>
+                </div>
+                <div style="padding:12px 10px; text-align:center; background:#f0fff4;">
+                    <div style="font-size:26px;">📷</div>
+                    <div style="font-size:12px; font-weight:800; color:#1fc8c8; text-transform:uppercase; letter-spacing:0.5px; margin:4px 0;">Close-Up Photo</div>
+                    <div style="font-size:11px; color:#555; line-height:1.4;">Individual items — stove, TV, screens</div>
+                </div>
+            </div>
+
+            <!-- General notes -->
+            <div style="background:white; border-radius:10px; padding:14px; margin-bottom:14px; border:2px solid #e9ecef;">
+                <label style="display:block; font-weight:700; color:#333; margin-bottom:8px; font-size:14px;">🗒️ General Notes</label>
+                <textarea id="generalNotes" placeholder="Overall unit condition, issues noticed, anything the property manager should know..."
+                    style="width:100%; padding:10px; border:2px solid #ddd; border-radius:8px; font-size:15px; min-height:80px; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+
+            <!-- Add pair CTA -->
+            <button type="button" onclick="window.addEvidencePair()" style="
+                width:100%; padding:16px;
+                background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);
+                color:white; border:none; border-radius:12px;
+                font-size:17px; font-weight:800; cursor:pointer;
+                margin-bottom:16px;
+                box-shadow:0 6px 0 #0d7a7a, 0 8px 16px rgba(0,0,0,0.25);
+                text-shadow:0 1px 2px rgba(0,0,0,0.2);
+                display:flex; flex-direction:column; align-items:center; gap:2px;
+            ">
+                <span>➕ Add Before &amp; After Evidence</span>
+                <span style="font-size:13px; font-weight:600; opacity:0.85;">Photo or Video</span>
+            </button>
+
+            <!-- Pairs render here -->
+            <div id="evidencePairs" style="display:flex; flex-direction:column; gap:14px; padding-bottom:30px;"></div>
+        </div>
+
+        <!-- Sticky footer — Done button -->
+        <div style="
+            flex-shrink:0; padding:14px 16px;
+            background:white; border-top:2px solid #e9ecef;
+            box-shadow:0 -4px 12px rgba(0,0,0,0.08);
+        ">
+            <button type="button" onclick="window.closePhotoBucket()" style="
+                width:100%; padding:16px;
+                background:linear-gradient(135deg,#1fc8c8 0%,#12a5a5 100%);
+                color:white; border:none; border-radius:12px;
+                font-size:17px; font-weight:800; cursor:pointer;
+                box-shadow:0 4px 12px rgba(31,200,200,0.4);
+            ">✅ Done — Return to Checklist</button>
+        </div>
+    </div>
+
+
+    <!-- PHOTO BUCKET MODAL -->
+    <div id="photoBucketModal" style="display:none;position:fixed;inset:0;z-index:2000;background:#f5f5f7;flex-direction:column;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#1fc8c8 0%,#12a5a5 100%);color:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+            <div>
+                <div style="font-size:18px;font-weight:800;">📸 Before &amp; After Evidence</div>
+                <div style="font-size:12px;opacity:0.85;margin-top:2px;" id="modalPhotoCount">0 files added</div>
+            </div>
+            <button type="button" onclick="window.closePhotoBucket()" style="background:rgba(255,255,255,0.2);border:2px solid white;color:white;border-radius:10px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer;">&#10005; Close</button>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;">
+            <div style="background:linear-gradient(135deg,#fff3cd,#ffeaa7);border:2px solid #f0ad4e;border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+                <div style="font-size:14px;font-weight:800;color:#856404;margin-bottom:4px;">&#9888;&#65039; Protect Spring Sparrow from False Damage Claims</div>
+                <div style="font-size:13px;color:#6d4c00;line-height:1.6;">We suspect guests may have damaged items or exaggerated minor issues to break their contract. <strong>Your documentation is our best protection.</strong></div>
+                <button type="button" onclick="window.toggleEvidenceTip()" id="evidenceTipBtn" style="background:none;border:none;color:#856404;font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;margin-top:6px;padding:0;">Show what to document &#9660;</button>
+                <div id="evidenceTipBody" style="display:none;margin-top:10px;font-size:12px;color:#6d4c00;line-height:1.6;">
+                    Close-ups of: beds &amp; mattresses, furniture, dressers, stove, fridge, TV, windows &amp; screens, thermostat, bathroom fixtures, towel bars, light fixtures, doors &amp; locks.
+                    <div style="margin-top:8px;padding:8px;background:rgba(255,255,255,0.6);border-radius:8px;font-size:11px;">In one case, we suspect a guest bent a slightly-bent window screen further and broke the thermostat to claim poor quality — but we had no before photos.</div>
+                </div>
+            </div>
+            <div style="text-align:center;font-size:13px;color:#0a5858;background:#e8f9f9;border:2px solid #1fc8c8;border-radius:10px 10px 0 0;padding:10px 14px;">&#128241; Your camera opens for each slot — choose <strong>Photo</strong> or <strong>Video</strong></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;border:2px solid #1fc8c8;border-top:none;border-radius:0 0 10px 10px;overflow:hidden;margin-bottom:14px;">
+                <div style="padding:12px 10px;text-align:center;background:#f0f7ff;border-right:1px solid #1fc8c8;">
+                    <div style="font-size:26px;">&#127909;</div>
+                    <div style="font-size:12px;font-weight:800;color:#1fc8c8;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0;">Video</div>
+                    <div style="font-size:11px;color:#555;line-height:1.4;">Room walkthroughs — pan slowly</div>
+                </div>
+                <div style="padding:12px 10px;text-align:center;background:#f0fff4;">
+                    <div style="font-size:26px;">&#128247;</div>
+                    <div style="font-size:12px;font-weight:800;color:#1fc8c8;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0;">Close-Up Photo</div>
+                    <div style="font-size:11px;color:#555;line-height:1.4;">Individual items — stove, TV, screens</div>
+                </div>
+            </div>
+            <div style="background:white;border-radius:10px;padding:14px;margin-bottom:14px;border:2px solid #e9ecef;">
+                <label style="display:block;font-weight:700;color:#333;margin-bottom:8px;font-size:14px;">General Notes</label>
+                <textarea id="generalNotes" placeholder="Overall unit condition, issues noticed, anything the property manager should know..." style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:15px;min-height:80px;font-family:inherit;resize:vertical;"></textarea>
+            </div>
+            <button type="button" onclick="window.addEvidencePair()" style="width:100%;padding:16px;background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);color:white;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:16px;box-shadow:0 6px 0 #0d7a7a,0 8px 16px rgba(0,0,0,0.25);text-shadow:0 1px 2px rgba(0,0,0,0.2);display:flex;flex-direction:column;align-items:center;gap:2px;">
+                <span>&#10133; Add Before &amp; After Evidence</span>
+                <span style="font-size:13px;font-weight:600;opacity:0.85;">Photo or Video</span>
+            </button>
+            <div id="evidencePairs" style="display:flex;flex-direction:column;gap:14px;padding-bottom:30px;"></div>
+        </div>
+        <div style="flex-shrink:0;padding:14px 16px;background:white;border-top:2px solid #e9ecef;box-shadow:0 -4px 12px rgba(0,0,0,0.08);">
+            <button type="button" onclick="window.closePhotoBucket()" style="width:100%;padding:16px;background:linear-gradient(135deg,#1fc8c8 0%,#12a5a5 100%);color:white;border:none;border-radius:12px;font-size:17px;font-weight:800;cursor:pointer;">&#10003; Done - Return to Checklist</button>
+        </div>
+    </div>
+
+    <div id="evidenceTagModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;align-items:flex-end;justify-content:center;padding:20px;">
+        <div style="background:white;border-radius:16px;width:100%;max-width:480px;padding:24px;">
+            <h3 id="evTagTitle" style="font-size:18px;margin-bottom:6px;color:#333;text-align:center;"></h3>
+            <p style="font-size:12px;color:#888;text-align:center;margin-bottom:16px;">This helps identify the file if a dispute comes up</p>
+            <div id="evTagPills" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"></div>
+            <input id="evTagOther" placeholder="Describe location..." style="width:100%;padding:10px 14px;border:2px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:14px;font-family:inherit;display:none;">
+            <button type="button" onclick="window.confirmEvidenceTag()" style="width:100%;padding:14px;background:#1fc8c8;color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">Save Location Tag</button>
+        </div>
+    </div>
+
+    <div id="evidenceLightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:4000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this){document.getElementById('lbVideo').pause();this.style.display='none';}">
+        <div style="position:relative;max-width:90vw;text-align:center;">
+            <button type="button" onclick="document.getElementById('lbVideo').pause();document.getElementById('evidenceLightbox').style.display='none';" style="position:absolute;top:-16px;right:-16px;background:#f45c43;color:white;border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;font-weight:700;">x</button>
+            <img id="lbImg" src="" alt="" style="max-width:100%;max-height:82vh;border-radius:10px;display:none;">
+            <video id="lbVideo" controls style="max-width:100%;max-height:82vh;border-radius:10px;display:none;background:#000;"></video>
+            <div id="lbMeta" style="color:#ccc;font-size:12px;margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var ROOMS = ['Kitchen','Living Room','Bedroom','Bathroom','Hallway','Exterior','Laundry','Garage','Stove / Oven','Windows & Screens','Thermostat','Other'];
+        var pendingTag = {pairId:null, side:null};
+        var selectedRoom = null;
+        var tipOpen = false;
+
+        window.openPhotoBucket = function() {
+            document.getElementById('photoBucketModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+        window.closePhotoBucket = function() {
+            document.getElementById('photoBucketModal').style.display = 'none';
+            document.body.style.overflow = '';
+            updateBadge();
+        };
+        window.toggleEvidenceTip = function() {
+            tipOpen = !tipOpen;
+            document.getElementById('evidenceTipBody').style.display = tipOpen ? 'block' : 'none';
+            document.getElementById('evidenceTipBtn').textContent = tipOpen ? 'Hide' : 'Show what to document';
+        };
+        function updateBadge() {
+            var total = (window.sessionPairs||[]).reduce(function(n,p){ if(p.before&&p.before.url)n++; if(p.after&&p.after.url)n++; return n; }, 0);
+            var pairs = (window.sessionPairs||[]).length;
+            var text = total > 0 ? total+' file'+(total!==1?'s':'')+' in '+pairs+' pair'+(pairs!==1?'s':'') : 'Tap to add photos & videos';
+            var t=document.getElementById('photoBucketCountTop'), b=document.getElementById('photoBucketCountBottom'), m=document.getElementById('modalPhotoCount');
+            if(t)t.textContent=text; if(b)b.textContent=text; if(m)m.textContent=total>0?total+' file'+(total!==1?'s':'')+' added':'0 files added';
+        }
+        window.addEvidencePair = function() {
+            window.pairCounter = (window.pairCounter||0)+1;
+            if (!window.sessionPairs) window.sessionPairs = [];
+            window.sessionPairs.push({id:window.pairCounter, before:{url:null,storageUrl:null,timestamp:null,tag:null,caption:'',isVideo:false}, after:{url:null,storageUrl:null,timestamp:null,tag:null,caption:'',isVideo:false}});
+            renderPairs();
+        };
+        window.removeEvidencePair = function(id) {
+            window.sessionPairs = (window.sessionPairs||[]).filter(function(p){return p.id!==id;});
+            renderPairs(); updateBadge();
+        };
+        function renderPairs() {
+            var container = document.getElementById('evidencePairs');
+            if (!container) return;
+            container.innerHTML = '';
+            (window.sessionPairs||[]).forEach(function(pair) {
+                var card = document.createElement('div');
+                card.style.cssText = 'border:2px solid #e9ecef;border-radius:12px;overflow:hidden;background:white;';
+                card.innerHTML = '<div style="background:#f8f9fa;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e9ecef;"><span style="font-weight:700;color:#333;font-size:14px;">Evidence Pair #'+pair.id+'</span><button type="button" onclick="removeEvidencePair('+pair.id+')" style="background:none;border:none;color:#f45c43;font-size:20px;cursor:pointer;line-height:1;">&#128465;</button></div><div style="display:grid;grid-template-columns:1fr 1fr;">'+renderCol(pair,'before')+renderCol(pair,'after')+'</div>';
+                container.appendChild(card);
+                ['before','after'].forEach(function(side){
+                    var inp = card.querySelector('#evinp-'+pair.id+'-'+side);
+                    if (inp) inp.addEventListener('change', function(e){ handleEvFile(e, pair.id, side); });
+                });
+            });
+        }
+        function renderCol(pair, side) {
+            var d = pair[side];
+            var isBefore = side==='before';
+            var labelColor = isBefore?'#f0ad4e':'#5cb85c';
+            var br = isBefore?'border-right:2px solid #e9ecef;':'';
+            var tagHtml = d.tag ? '<span style="background:#1fc8c8;color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">'+d.tag+'</span>' : '<span style="color:#bbb;font-size:11px;">No tag yet</span>';
+            var mediaHtml = d.url
+                ? (d.isVideo ? '<video src="'+d.url+'" style="width:100%;height:100%;object-fit:cover;" muted playsinline></video>' : '<img src="'+d.url+'" style="width:100%;height:100%;object-fit:cover;">')
+                  + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:white;font-size:9px;padding:3px 5px;text-align:center;">'+(d.timestamp||'')+'</div>'
+                  + '<button type="button" onclick="evRetake(event,'+pair.id+',''+side+'')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:5px;font-size:10px;padding:2px 6px;cursor:pointer;">Retake</button>'
+                  + '<button type="button" onclick="evExpand(event,'+pair.id+',''+side+'')" style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:5px;font-size:10px;padding:2px 6px;cursor:pointer;">'+(d.isVideo?'Video':'Photo')+'</button>'
+                : '<div style="text-align:center;color:#aaa;font-size:12px;padding:8px;line-height:1.6;pointer-events:none;"><div style="font-size:28px;margin-bottom:6px;">'+(isBefore?'&#128247;':'&#9989;')+'</div>Tap for <strong>'+(isBefore?'BEFORE':'AFTER')+'</strong><br>photo or video<div style="font-size:10px;color:#ccc;margin-top:4px;">Photo or Video</div></div>';
+            return '<div style="padding:12px;'+br+'"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:'+labelColor+';margin-bottom:8px;">'+(isBefore?'BEFORE':'AFTER')+'</div>'
+                +'<div onclick="evSlotClick('+pair.id+',''+side+'')" style="aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;background:#f8f9fa;border:2px '+(d.url?'solid #1fc8c8':'dashed #ddd')+';display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:8px;">'+mediaHtml+'</div>'
+                +'<input type="file" accept="image/*,video/*" capture="environment" id="evinp-'+pair.id+'-'+side+'" style="display:none;">'
+                +'<div style="margin-bottom:6px;"><div style="font-size:11px;font-weight:700;color:#666;margin-bottom:4px;">Location:</div><div style="margin-bottom:5px;">'+tagHtml+'</div>'
+                +(d.url?'<button type="button" onclick="openEvTag('+pair.id+',''+side+'')" style="font-size:11px;padding:4px 9px;border:2px solid #1fc8c8;background:white;color:#1fc8c8;border-radius:6px;cursor:pointer;font-weight:700;">'+(d.tag?'Change Tag':'Add Tag')+'</button>':'')
+                +'</div>'
+                +(d.url?'<input type="text" placeholder="Caption..." value="'+(d.caption||'')+'" oninput="evCaption('+pair.id+',''+side+'',this.value)" style="width:100%;padding:6px 8px;border:2px solid #ddd;border-radius:7px;font-size:12px;font-family:inherit;">':'')
+                +'</div>';
+        }
+        window.evSlotClick = function(pairId, side) {
+            var pair = (window.sessionPairs||[]).find(function(p){return p.id===pairId;});
+            if (pair && pair[side].url) return;
+            var inp = document.getElementById('evinp-'+pairId+'-'+side);
+            if (inp) inp.click();
+        };
+        window.evRetake = function(e, pairId, side) {
+            e.stopPropagation();
+            var inp = document.getElementById('evinp-'+pairId+'-'+side);
+            if (inp) inp.click();
+        };
+        window.evExpand = function(e, pairId, side) {
+            e.stopPropagation();
+            var pair = (window.sessionPairs||[]).find(function(p){return p.id===pairId;});
+            if (!pair||!pair[side].url) return;
+            var d = pair[side];
+            var img=document.getElementById('lbImg'), vid=document.getElementById('lbVideo');
+            if (d.isVideo){img.style.display='none';vid.style.display='block';vid.src=d.url;}
+            else{vid.style.display='none';img.style.display='block';img.src=d.url;}
+            document.getElementById('lbMeta').textContent=(side==='before'?'BEFORE':'AFTER')+' - '+(d.tag||'Untagged')+' - '+(d.timestamp||'');
+            document.getElementById('evidenceLightbox').style.display='flex';
+        };
+        window.handleEvFile = function(e, pairId, side) {
+            var file = e.target.files[0]; if (!file) return;
+            var isVideo = file.type.startsWith('video/');
+            var localUrl = URL.createObjectURL(file);
+            var now = new Date();
+            var ts = now.toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+            var pair = (window.sessionPairs||[]).find(function(p){return p.id===pairId;});
+            pair[side].url=localUrl; pair[side].timestamp=ts; pair[side].isVideo=isVideo;
+            renderPairs(); updateBadge();
+            openEvTag(pairId, side);
+            var unitId = document.getElementById('unitLocation').value;
+            if (unitId && window.storage && window.storageRef) {
+                var unitName = document.getElementById('unitLocation').selectedOptions[0].text.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30);
+                var ext = isVideo?'mp4':'jpg';
+                var fileName = side+'_'+now.toISOString().replace(/[:.]/g,'-').slice(0,19)+'.'+ext;
+                var sRef = window.storageRef(window.storage,'photos/'+unitId+'/'+unitName+'/'+fileName);
+                window.storageUpload(sRef, file).then(function(){ return window.storageGetUrl(sRef); })
+                .then(function(url){ pair[side].storageUrl=url; pair[side].url=url; renderPairs(); })
+                .catch(function(err){ console.warn('Upload failed:',err.message); });
+            }
+            e.target.value='';
+        };
+        window.evCaption = function(pairId, side, value) {
+            var pair=(window.sessionPairs||[]).find(function(p){return p.id===pairId;});
+            if(pair) pair[side].caption=value;
+        };
+        window.openEvTag = function(pairId, side) {
+            pendingTag={pairId:pairId,side:side}; selectedRoom=null;
+            var pair=(window.sessionPairs||[]).find(function(p){return p.id===pairId;});
+            var existing=pair?pair[side].tag:null;
+            var isVideo=pair?pair[side].isVideo:false;
+            document.getElementById('evTagTitle').textContent='Where is this '+(side==='before'?'BEFORE':'AFTER')+' '+(isVideo?'video':'photo')+'?';
+            var pillsEl=document.getElementById('evTagPills'); pillsEl.innerHTML='';
+            ROOMS.forEach(function(room){
+                var pill=document.createElement('div');
+                var sel=existing===room;
+                pill.style.cssText='padding:12px;border-radius:10px;border:2px solid '+(sel?'#1fc8c8':'#e9ecef')+';background:'+(sel?'#1fc8c8':'#f8f9fa')+';font-size:14px;font-weight:600;cursor:pointer;text-align:center;color:'+(sel?'white':'#444')+';';
+                pill.textContent=room;
+                pill.onclick=function(){
+                    selectedRoom=room;
+                    pillsEl.querySelectorAll('div').forEach(function(p){p.style.background='#f8f9fa';p.style.borderColor='#e9ecef';p.style.color='#444';});
+                    pill.style.background='#1fc8c8';pill.style.borderColor='#1fc8c8';pill.style.color='white';
+                    document.getElementById('evTagOther').style.display=room==='Other'?'block':'none';
+                };
+                pillsEl.appendChild(pill);
+            });
+            document.getElementById('evTagOther').style.display='none';
+            document.getElementById('evTagOther').value='';
+            if(existing&&ROOMS.indexOf(existing)<0){document.getElementById('evTagOther').style.display='block';document.getElementById('evTagOther').value=existing;selectedRoom='Other';}
+            document.getElementById('evidenceTagModal').style.display='flex';
+        };
+        window.confirmEvidenceTag = function() {
+            if(!selectedRoom){alert('Please select a location first.');return;}
+            var other=document.getElementById('evTagOther');
+            var finalTag=selectedRoom==='Other'?(other.value.trim()||'Other'):selectedRoom;
+            var pair=(window.sessionPairs||[]).find(function(p){return p.id===pendingTag.pairId;});
+            if(pair) pair[pendingTag.side].tag=finalTag;
+            document.getElementById('evidenceTagModal').style.display='none';
+            renderPairs();
+        };
+    })();
+    </script>
+
+</body>
+</html>
