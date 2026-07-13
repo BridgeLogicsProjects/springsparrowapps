@@ -803,36 +803,36 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>ðŸ¦ Spring Sparrow Inventory System</h1>
+            <h1>🐦 Spring Sparrow Inventory System</h1>
             <p>Property Management & Turnover Tracking</p>
-            <button class="admin-btn" id="adminToggle" onclick="toggleAdminMode()">âš™ï¸ Admin</button>
+            <button class="admin-btn" id="adminToggle" onclick="toggleAdminMode()">⚙️ Admin</button>
         </div>
 
         <div id="accessCheck" class="access-denied">
             <div class="access-form">
-                <h2>ðŸ” Access Code Required</h2>
+                <h2>🔐 Access Code Required</h2>
                 <p style="margin-bottom: 20px; color: #666;">Enter your access code to continue</p>
                 <input type="password" id="accessCodeInput" placeholder="Enter access code">
-                <button type="button" onclick="checkAccess()">Enter</button>
+                <button onclick="checkAccess()">Enter</button>
             </div>
         </div>
 
         <div id="mainApp" style="display: none;">
             <div class="nav-tabs" id="navTabs">
-                <button class="nav-tab active" onclick="switchTab('checklist')">ðŸ“‹ New Inspection</button>
-                <button class="nav-tab" onclick="switchTab('reports')">ðŸ“Š Reports</button>
+                <button class="nav-tab active" onclick="switchTab('checklist')">📋 New Inspection</button>
+                <button class="nav-tab" onclick="switchTab('reports')">📊 Reports</button>
             </div>
 
             <!-- CHECKLIST TAB -->
             <div id="checklist-tab" class="tab-content active">
                 <div class="form-section">
                     <div id="adminBanner" class="admin-mode-banner" style="display: none;">
-                        ðŸ”§ ADMIN MODE ACTIVE - You can edit sections and items
+                        🔧 ADMIN MODE ACTIVE - You can edit sections and items
                     </div>
 
                     <div class="auto-info">
-                        ðŸ“… <strong>Today's Date:</strong> <span id="currentDate"></span><br>
-                        ðŸ‘¥ <strong>Inspector:</strong> Vita Professional Cleaning Crew
+                        📅 <strong>Today's Date:</strong> <span id="currentDate"></span><br>
+                        👥 <strong>Inspector:</strong> Vita Professional Cleaning Crew
                     </div>
 
                     <form id="inventoryForm">
@@ -850,27 +850,10 @@
                         </div>
 
                         <button type="button" id="addSectionBtn" class="add-section-btn" style="display: none;" onclick="addNewSection()">
-                            âž• Add New Section
+                            ➕ Add New Section
                         </button>
 
-                        
-                        <!-- PHOTO BUCKET TRIGGER -->
-                        <div id="photoBucketTrigger" style="display:none; margin:20px 0;">
-                            <button type="button" onclick="openPhotoBucket()" style="
-                                width:100%; padding:16px;
-                                background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);
-                                color:white; border:none; border-radius:12px;
-                                font-size:17px; font-weight:800; cursor:pointer;
-                                box-shadow:0 6px 0 #0d7a7a, 0 8px 16px rgba(0,0,0,0.25);
-                                letter-spacing:0.3px; text-shadow:0 1px 2px rgba(0,0,0,0.2);
-                                display:flex; flex-direction:column; align-items:center; gap:4px;
-                            ">
-                                <span>📸 Before &amp; After Evidence</span>
-                                <span style="font-size:13px; font-weight:600; opacity:0.85;" id="photoBucketCount">Tap to add photos &amp; videos</span>
-                            </button>
-                        </div>
-
-<button type="submit" class="submit-btn">ðŸ“§ Submit Report</button>
+                        <button type="submit" class="submit-btn">📧 Submit Report</button>
                     </form>
                 </div>
             </div>
@@ -879,7 +862,7 @@
             <div id="reports-tab" class="tab-content">
                 <div class="reports-container">
                     <div class="reports-header">
-                        <h2>ðŸ“Š Inspection Reports</h2>
+                        <h2>📊 Inspection Reports</h2>
                         
                         <div class="reports-filters">
                             <div class="filter-group">
@@ -943,7 +926,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC6W83NZRYljB8YrLHGRvDtDBoU_vCBao0",
@@ -957,12 +939,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         window.db = db;
-        window.storage = storage;
-        window.sessionPairs = [];
-        window.pairCounter = 0;
         window.isAdmin = false;
         window.adminModeActive = false;
         window.currentUnits = [];
@@ -1062,11 +1040,6 @@
             }
 
             renderInventory();
-            document.getElementById('photoBucketTrigger').style.display = 'block';
-            window.sessionPairs = [];
-            window.pairCounter = 0;
-            document.getElementById('evidencePairs').innerHTML = '';
-            document.getElementById('generalNotes').value = '';
         };
 
         function getDefaultInventory() {
@@ -1074,7 +1047,7 @@
                 sections: [
                     {
                         id: 'electronics',
-                        name: 'ðŸ“± Electronics and Appliances',
+                        name: '📱 Electronics and Appliances',
                         type: 'checklist',
                         rooms: [
                             {
@@ -1113,7 +1086,7 @@
                     },
                     {
                         id: 'kitchen_dining',
-                        name: 'ðŸ³ Kitchen & Dining Essentials',
+                        name: '🍳 Kitchen & Dining Essentials',
                         type: 'checklist',
                         rooms: [
                             {
@@ -1136,7 +1109,7 @@
                     },
                     {
                         id: 'bedroom_essentials',
-                        name: 'ðŸ›ï¸ Bedroom Essentials - Linens',
+                        name: '🛏️ Bedroom Essentials - Linens',
                         type: 'checklist',
                         rooms: [
                             {
@@ -1153,7 +1126,7 @@
                     },
                     {
                         id: 'bathroom_essentials',
-                        name: 'ðŸ› Bathroom Essentials',
+                        name: '🛁 Bathroom Essentials',
                         type: 'checklist',
                         rooms: [
                             {
@@ -1169,7 +1142,7 @@
                     },
                     {
                         id: 'restock_bathroom',
-                        name: 'ðŸ§´ Restocking - Bathroom Essentials',
+                        name: '🧴 Restocking - Bathroom Essentials',
                         type: 'restock',
                         rooms: [
                             {
@@ -1185,7 +1158,7 @@
                     },
                     {
                         id: 'restock_kitchen',
-                        name: 'ðŸ§½ Restocking - Kitchen Essentials',
+                        name: '🧽 Restocking - Kitchen Essentials',
                         type: 'restock',
                         rooms: [
                             {
@@ -1200,7 +1173,7 @@
                     },
                     {
                         id: 'restock_amenities',
-                        name: 'ðŸ· Restocking - Guest Amenities',
+                        name: '🍷 Restocking - Guest Amenities',
                         type: 'restock',
                         rooms: [
                             {
@@ -1241,8 +1214,8 @@
                     const buttonsDiv = document.createElement('div');
                     buttonsDiv.className = 'room-header-buttons';
                     buttonsDiv.innerHTML = `
-                        <button class="btn-section" type="button" onclick="event.preventDefault(); addRoom(${sectionIdx})">âž• Room</button>
-                        <button class="btn-section" type="button" onclick="event.preventDefault(); deleteSection(${sectionIdx})">ðŸ—‘ï¸</button>
+                        <button class="btn-section" type="button" onclick="event.preventDefault(); addRoom(${sectionIdx})">➕ Room</button>
+                        <button class="btn-section" type="button" onclick="event.preventDefault(); deleteSection(${sectionIdx})">🗑️</button>
                     `;
                     headerDiv.appendChild(buttonsDiv);
                 }
@@ -1262,8 +1235,8 @@
                             const roomButtons = document.createElement('div');
                             roomButtons.className = 'room-header-buttons';
                             roomButtons.innerHTML = `
-                                <button class="btn-section" type="button" onclick="event.preventDefault(); addItem(${sectionIdx}, ${roomIdx})">âž• Item</button>
-                                <button class="btn-section" type="button" onclick="event.preventDefault(); deleteRoom(${sectionIdx}, ${roomIdx})">ðŸ—‘ï¸</button>
+                                <button class="btn-section" type="button" onclick="event.preventDefault(); addItem(${sectionIdx}, ${roomIdx})">➕ Item</button>
+                                <button class="btn-section" type="button" onclick="event.preventDefault(); deleteRoom(${sectionIdx}, ${roomIdx})">🗑️</button>
                             `;
                             roomHeaderDiv.appendChild(roomButtons);
                         }
@@ -1273,7 +1246,7 @@
                         const addItemDiv = document.createElement('div');
                         addItemDiv.style.padding = '10px 20px';
                         addItemDiv.style.background = '#f8f9fa';
-                        addItemDiv.innerHTML = `<button class="btn-section" type="button" onclick="event.preventDefault(); addItem(${sectionIdx}, ${roomIdx})" style="background: #5cb85c; color: white;">âž• Add Item to ${section.name}</button>`;
+                        addItemDiv.innerHTML = `<button class="btn-section" type="button" onclick="event.preventDefault(); addItem(${sectionIdx}, ${roomIdx})" style="background: #5cb85c; color: white;">➕ Add Item to ${section.name}</button>`;
                         sectionDiv.appendChild(addItemDiv);
                     }
 
@@ -1285,8 +1258,8 @@
                             const adminControls = document.createElement('div');
                             adminControls.className = 'item-admin-controls';
                             adminControls.innerHTML = `
-                                <button class="btn-item-edit" type="button" onclick="event.preventDefault(); editItem(${sectionIdx}, ${roomIdx}, ${itemIdx})">âœï¸</button>
-                                <button class="btn-item-delete" type="button" onclick="event.preventDefault(); deleteItem(${sectionIdx}, ${roomIdx}, ${itemIdx})">ðŸ—‘ï¸</button>
+                                <button class="btn-item-edit" type="button" onclick="event.preventDefault(); editItem(${sectionIdx}, ${roomIdx}, ${itemIdx})">✏️</button>
+                                <button class="btn-item-delete" type="button" onclick="event.preventDefault(); deleteItem(${sectionIdx}, ${roomIdx}, ${itemIdx})">🗑️</button>
                             `;
                             itemDiv.appendChild(adminControls);
                         }
@@ -1314,11 +1287,11 @@
                         if (section.type === 'restock') {
                             contentDiv.innerHTML = `
                                 <div class="item-name">${item.name}</div>
-                                ${item.location ? `<div class="item-location">ðŸ“ ${item.location}</div>` : ''}
+                                ${item.location ? `<div class="item-location">📍 ${item.location}</div>` : ''}
                                 <div class="controls">
                                     <div class="stock-level">
                                         <label class="stock-option full">
-                                            <input type="radio" name="${item.id}" value="full"> Full
+                                            <input type="radio" name="${item.id}" value="full" required> Full
                                         </label>
                                         <label class="stock-option low">
                                             <input type="radio" name="${item.id}" value="low"> Low
@@ -1337,11 +1310,11 @@
                         } else {
                             contentDiv.innerHTML = `
                                 <div class="item-name">${item.name}</div>
-                                ${item.location ? `<div class="item-location">ðŸ“ ${item.location}</div>` : ''}
+                                ${item.location ? `<div class="item-location">📍 ${item.location}</div>` : ''}
                                 <div class="controls">
                                     <div class="radio-group">
                                         <label class="radio-label">
-                                            <input type="radio" name="${item.id}" value="yes"> Yes
+                                            <input type="radio" name="${item.id}" value="yes" required> Yes
                                         </label>
                                         <label class="radio-label">
                                             <input type="radio" name="${item.id}" value="no"> No
@@ -1395,7 +1368,7 @@
                 if (window.allReports.length === 0) {
                     reportsList.innerHTML = `
                         <div class="no-reports">
-                            <div class="no-reports-icon">ðŸ“‹</div>
+                            <div class="no-reports-icon">📋</div>
                             <h3>No Reports Yet</h3>
                             <p>Reports will appear here after inspections are submitted.</p>
                         </div>
@@ -1469,9 +1442,9 @@
 
                     <div class="report-status">
                         ${hasIssues ? '' : '<span class="status-badge success">✅ All Clear</span>'}
-                        ${missingCount > 0 ? `<span class="status-badge danger">âš ï¸ ${missingCount} Missing</span>` : ''}
-                        ${damagedCount > 0 ? `<span class="status-badge danger">ðŸ”§ ${damagedCount} Damaged</span>` : ''}
-                        ${restockCount > 0 ? `<span class="status-badge warning">ðŸ“¦ ${restockCount} Need Restock</span>` : ''}
+                        ${missingCount > 0 ? `<span class="status-badge danger">⚠️ ${missingCount} Missing</span>` : ''}
+                        ${damagedCount > 0 ? `<span class="status-badge danger">🔧 ${damagedCount} Damaged</span>` : ''}
+                        ${restockCount > 0 ? `<span class="status-badge warning">📦 ${restockCount} Need Restock</span>` : ''}
                     </div>
 
                     <div class="report-details" id="details-${idx}">
@@ -1483,17 +1456,17 @@
                                 <div class="report-item ${data.damaged ? 'critical' : 'issue'}">
                                     <div class="report-item-name">${name}</div>
                                     <div class="report-item-details">
-                                        ${data.status === 'no' || data.status === 'empty' ? 'âŒ Missing/Empty â€¢ ' : ''}
-                                        ${data.damaged ? 'ðŸ”§ Damaged â€¢ ' : ''}
-                                        ${data.needsRestock ? 'ðŸ“¦ Needs Restock â€¢ ' : ''}
-                                        ${data.status === 'low' ? 'âš ï¸ Low Stock â€¢ ' : ''}
+                                        ${data.status === 'no' || data.status === 'empty' ? '❌ Missing/Empty • ' : ''}
+                                        ${data.damaged ? '🔧 Damaged • ' : ''}
+                                        ${data.needsRestock ? '📦 Needs Restock • ' : ''}
+                                        ${data.status === 'low' ? '⚠️ Low Stock • ' : ''}
                                         ${data.notes ? `Note: ${data.notes}` : ''}
                                     </div>
                                 </div>
                             `).join('') || '<p style="color: #666;">No issues found.</p>'}
                         </div>
                         
-                        <button class="export-btn" onclick="exportReportToCSV('${report.id}')">ðŸ’¾ Export to CSV</button>
+                        <button class="export-btn" onclick="exportReportToCSV('${report.id}')">💾 Export to CSV</button>
                     </div>
                 `;
 
@@ -1570,7 +1543,7 @@
             if (!window.isAdmin) {
                 const passcode = prompt('Enter admin passcode:');
                 if (passcode !== '2008') {
-                    alert('âŒ Incorrect passcode');
+                    alert('❌ Incorrect passcode');
                     return;
                 }
                 window.isAdmin = true;
@@ -1582,11 +1555,11 @@
 
             if (window.adminModeActive) {
                 btn.classList.add('active');
-                btn.textContent = 'ðŸ‘ï¸ Crew View';
+                btn.textContent = '👁️ Crew View';
                 banner.style.display = 'block';
             } else {
                 btn.classList.remove('active');
-                btn.textContent = 'âš™ï¸ Admin';
+                btn.textContent = '⚙️ Admin';
                 banner.style.display = 'none';
             }
 
@@ -1728,51 +1701,8 @@
         document.getElementById('inventoryForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const unitSelect = document.getElementById('unitLocation');
-
-            // ── Validation ──
-            if (!unitSelect.value) {
-                alert('⚠️ Please select a unit before submitting.');
-                return;
-            }
-
-            // Find all radio groups (each item has a named group)
-            const allRadioGroups = new Set();
-            document.querySelectorAll('#inventoryItems input[type="radio"]').forEach(r => {
-                // Only track base item names (not _restock etc)
-                if (!r.name.endsWith('_restock')) allRadioGroups.add(r.name);
-            });
-
-            const unanswered = [];
-            allRadioGroups.forEach(name => {
-                const answered = document.querySelector(`input[name="${name}"]:checked`);
-                if (!answered) unanswered.push(name);
-            });
-
-            if (unanswered.length > 0) {
-                // Highlight unanswered items
-                document.querySelectorAll('.item-row').forEach(row => row.style.background = '');
-                unanswered.forEach(name => {
-                    const radio = document.querySelector(`input[name="${name}"]`);
-                    if (radio) {
-                        const row = radio.closest('.item-row');
-                        if (row) row.style.background = '#fff0f0';
-                    }
-                });
-                // Scroll to first unanswered
-                const firstRadio = document.querySelector(`input[name="${unanswered[0]}"]`);
-                if (firstRadio) firstRadio.closest('.item-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                alert(`⚠️ ${unanswered.length} item${unanswered.length > 1 ? 's' : ''} still need a response.
-
-They are highlighted in red — please scroll through and complete them.`);
-                return;
-            }
-
-            // Clear any highlights
-            document.querySelectorAll('.item-row').forEach(row => row.style.background = '');
-
             const formData = new FormData(e.target);
+            const unitSelect = document.getElementById('unitLocation');
             
             const report = {
                 date: new Date().toISOString().split('T')[0],
@@ -1792,388 +1722,9 @@ They are highlighted in red — please scroll through and complete them.`);
                 alert('✅ Report submitted successfully!');
                 e.target.reset();
             } catch (error) {
-                alert('âŒ Error: ' + error.message);
+                alert('❌ Error: ' + error.message);
             }
         });
-
-        // ═══════════════════════════════════════════════════
-        // BEFORE & AFTER EVIDENCE — Photo + Video Upload
-        // ═══════════════════════════════════════════════════
-
-        const EVIDENCE_ROOMS = ['Kitchen','Living Room','Bedroom','Bathroom','Hallway','Exterior','Laundry','Garage','Stove / Oven','Windows & Screens','Thermostat','Other'];
-        let evidencePendingTag = { pairId: null, side: null };
-        let evidenceSelectedRoom = null;
-
-        
-        window.openPhotoBucket = function() {
-            document.getElementById('photoBucketModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        };
-
-        window.closePhotoBucket = function() {
-            document.getElementById('photoBucketModal').style.display = 'none';
-            document.body.style.overflow = '';
-            updatePhotoBucketBadge();
-        };
-
-        function updatePhotoBucketBadge() {
-            const total = (window.sessionPairs||[]).reduce((n,p) => {
-                if(p.before?.url) n++; if(p.after?.url) n++; return n;
-            }, 0);
-            const pairs = (window.sessionPairs||[]).length;
-            const countEl = document.getElementById('photoBucketCount');
-            const modalCountEl = document.getElementById('modalPhotoCount');
-            const text = total > 0
-                ? `${total} file${total!==1?'s':''} in ${pairs} pair${pairs!==1?'s':''}`
-                : 'Tap to add photos & videos';
-            if (countEl) countEl.textContent = text;
-            if (modalCountEl) modalCountEl.textContent = total > 0 ? `${total} file${total!==1?'s':''} added` : '0 files added';
-        }
-
-        window.toggleEvidenceTip = function() {
-            const body = document.getElementById('evidenceTipBody');
-            const btn = document.getElementById('evidenceTipBtn');
-            const visible = body.style.display === 'block';
-            body.style.display = visible ? 'none' : 'block';
-            btn.textContent = visible ? 'Show what to document ▼' : 'Hide ▲';
-        };
-
-        window.addEvidencePair = function() {
-            window.pairCounter++;
-            const id = window.pairCounter;
-            window.sessionPairs.push({
-                id,
-                before: { url: null, storageUrl: null, timestamp: null, tag: null, caption: '', isVideo: false },
-                after:  { url: null, storageUrl: null, timestamp: null, tag: null, caption: '', isVideo: false }
-            });
-            renderEvidencePairs();
-        };
-
-        window.removeEvidencePair = function(id) {
-            window.sessionPairs = window.sessionPairs.filter(p => p.id !== id);
-            renderEvidencePairs();
-        };
-
-        function renderEvidencePairs() {
-            const container = document.getElementById('evidencePairs');
-            container.innerHTML = '';
-            window.sessionPairs.forEach(pair => {
-                const card = document.createElement('div');
-                card.style.cssText = 'border:2px solid #e9ecef; border-radius:12px; overflow:hidden;';
-                card.innerHTML = `
-                    <div style="background:#f8f9fa; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e9ecef;">
-                        <span style="font-weight:700; color:#333; font-size:14px;">📋 Evidence Pair #${pair.id}</span>
-                        <button type="button" onclick="removeEvidencePair(${pair.id})" style="background:none;border:none;color:#f45c43;font-size:18px;cursor:pointer;">🗑</button>
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr;">
-                        ${renderEvidenceCol(pair, 'before')}
-                        ${renderEvidenceCol(pair, 'after')}
-                    </div>
-                `;
-                container.appendChild(card);
-
-                ['before','after'].forEach(side => {
-                    const input = card.querySelector(`#ev-input-${pair.id}-${side}`);
-                    if (input) input.addEventListener('change', e => handleEvidenceFile(e, pair.id, side));
-                });
-            });
-        }
-
-        function renderEvidenceCol(pair, side) {
-            const d = pair[side];
-            const isBefore = side === 'before';
-            const borderRight = isBefore ? 'border-right:2px solid #e9ecef;' : '';
-            const labelColor = isBefore ? '#f0ad4e' : '#5cb85c';
-            const labelText = isBefore ? '🟡 BEFORE' : '🟢 AFTER';
-            const tagHtml = d.tag
-                ? `<span style="background:#1fc8c8;color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">📍 ${d.tag}</span>`
-                : `<span style="color:#bbb;font-size:11px;">No tag yet</span>`;
-            const mediaHtml = d.url
-                ? (d.isVideo
-                    ? `<video src="${d.url}" style="width:100%;height:100%;object-fit:cover;" muted playsinline></video>`
-                    : `<img src="${d.url}" style="width:100%;height:100%;object-fit:cover;">`)
-                : `<div style="text-align:center;color:#aaa;font-size:12px;padding:8px;line-height:1.6;">
-                        <div style="font-size:28px;margin-bottom:6px;">${isBefore ? '📷' : '✅'}</div>
-                        Tap for<br><strong>${isBefore ? 'BEFORE' : 'AFTER'}</strong><br>photo or video
-                        <div style="font-size:10px;color:#ccc;margin-top:4px;">Photo or Video</div>
-                   </div>`;
-
-            return `
-                <div style="padding:14px; ${borderRight}">
-                    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${labelColor};margin-bottom:10px;">${labelText}</div>
-                    <div onclick="evidenceSlotClick(${pair.id},'${side}')"
-                         style="aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;
-                                background:#f8f9fa;border:2px ${d.url ? 'solid #1fc8c8' : 'dashed #ddd'};
-                                display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:10px;">
-                        ${mediaHtml}
-                        ${d.url ? `
-                        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:white;font-size:9px;padding:3px 6px;text-align:center;">${d.timestamp||''}</div>
-                        <button type="button" onclick="retakeEvidence(event,${pair.id},'${side}')" style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:6px;font-size:10px;padding:3px 7px;cursor:pointer;font-weight:600;">↺ Retake</button>
-                        <span style="position:absolute;top:5px;left:5px;background:rgba(0,0,0,0.7);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;">${d.isVideo ? '🎥' : '📷'}</span>
-                        ` : ''}
-                    </div>
-                    <input type="file" accept="image/*,video/*" capture="environment"
-                           id="ev-input-${pair.id}-${side}" style="display:none;">
-                    <div style="margin-bottom:6px;">
-                        <div style="font-size:12px;font-weight:700;color:#666;margin-bottom:4px;">📍 Location:</div>
-                        <div style="margin-bottom:5px;">${tagHtml}</div>
-                        ${d.url ? `<button type="button" onclick="openEvidenceTagModal(${pair.id},'${side}')" style="font-size:11px;padding:4px 10px;border:2px solid #1fc8c8;background:white;color:#1fc8c8;border-radius:6px;cursor:pointer;font-weight:700;">${d.tag ? '✏️ Change' : '➕ Tag Location'}</button>` : ''}
-                    </div>
-                    ${d.url ? `<input type="text" placeholder="Caption (optional)..." value="${d.caption||''}"
-                        oninput="updateEvidenceCaption(${pair.id},'${side}',this.value)"
-                        style="width:100%;padding:7px 10px;border:2px solid #ddd;border-radius:8px;font-size:12px;font-family:inherit;">` : ''}
-                </div>
-            `;
-        }
-
-        window.evidenceSlotClick = function(pairId, side) {
-            const pair = window.sessionPairs.find(p => p.id === pairId);
-            if (pair[side].url) return;
-            document.getElementById(`ev-input-${pairId}-${side}`).click();
-        };
-
-        window.retakeEvidence = function(event, pairId, side) {
-            event.stopPropagation();
-            document.getElementById(`ev-input-${pairId}-${side}`).click();
-        };
-
-        window.handleEvidenceFile = async function(event, pairId, side) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const isVideo = file.type.startsWith('video/');
-            const localUrl = URL.createObjectURL(file);
-            const now = new Date();
-            const ts = now.toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
-            const pair = window.sessionPairs.find(p => p.id === pairId);
-            pair[side].url = localUrl;
-            pair[side].timestamp = ts;
-            pair[side].isVideo = isVideo;
-            renderEvidencePairs();
-            updatePhotoBucketBadge();
-            openEvidenceTagModal(pairId, side);
-
-            // Upload to Firebase Storage in background
-            try {
-                const unitId = document.getElementById('unitLocation').value;
-                const unitName = document.getElementById('unitLocation').selectedOptions[0].text.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30);
-                const ext = isVideo ? 'mp4' : 'jpg';
-                const fileName = `${side}_${now.toISOString().replace(/[:.]/g,'-').slice(0,19)}.${ext}`;
-                const storageRef = ref(storage, `photos/${unitId}/${unitName}/${fileName}`);
-                const fileToUpload = isVideo ? file : await compressImage(file);
-                await uploadBytes(storageRef, fileToUpload, {
-                    customMetadata: { uploadedAt: now.toISOString(), side, unitId }
-                });
-                const downloadURL = await getDownloadURL(storageRef);
-                pair[side].storageUrl = downloadURL;
-                pair[side].url = downloadURL;
-                console.log('✅ Uploaded:', fileName);
-            } catch(err) {
-                console.warn('Upload failed, using local preview:', err.message);
-            }
-            event.target.value = '';
-        };
-
-        function compressImage(file) {
-            return new Promise(resolve => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                img.onload = () => {
-                    const MAX = 1200;
-                    let w = img.width, h = img.height;
-                    if (w > MAX || h > MAX) {
-                        if (w > h) { h = Math.round(h*MAX/w); w=MAX; }
-                        else { w = Math.round(w*MAX/h); h=MAX; }
-                    }
-                    canvas.width=w; canvas.height=h;
-                    ctx.drawImage(img,0,0,w,h);
-                    canvas.toBlob(resolve,'image/jpeg',0.82);
-                };
-                img.src = URL.createObjectURL(file);
-            });
-        }
-
-        window.updateEvidenceCaption = function(pairId, side, value) {
-            const pair = window.sessionPairs.find(p => p.id === pairId);
-            if (pair) pair[side].caption = value;
-        };
-
-        // Tag modal
-        window.openEvidenceTagModal = function(pairId, side) {
-            evidencePendingTag = { pairId, side };
-            evidenceSelectedRoom = null;
-            const pair = window.sessionPairs.find(p => p.id === pairId);
-            const existing = pair ? pair[side].tag : null;
-            const isVideo = pair ? pair[side].isVideo : false;
-
-            // Build modal
-            let modalEl = document.getElementById('evidenceTagModal');
-            if (!modalEl) {
-                modalEl = document.createElement('div');
-                modalEl.id = 'evidenceTagModal';
-                modalEl.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10000;align-items:flex-end;justify-content:center;padding:20px;';
-                modalEl.innerHTML = `
-                    <div style="background:white;border-radius:16px;width:100%;max-width:480px;padding:24px;">
-                        <h3 id="evTagTitle" style="font-size:18px;margin-bottom:6px;color:#333;text-align:center;"></h3>
-                        <p style="font-size:12px;color:#888;text-align:center;margin-bottom:16px;">This helps identify the file if a dispute comes up</p>
-                        <div id="evTagPills" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"></div>
-                        <input id="evTagOther" placeholder="Describe location (e.g. Master Bedroom Closet)..."
-                               style="width:100%;padding:10px 14px;border:2px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:14px;font-family:inherit;display:none;">
-                        <button type="button" onclick="confirmEvidenceTag()"
-                                style="width:100%;padding:14px;background:#1fc8c8;color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">
-                            ✅ Save Location Tag
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(modalEl);
-            }
-
-            document.getElementById('evTagTitle').textContent =
-                `📍 Where is this ${side === 'before' ? 'BEFORE' : 'AFTER'} ${isVideo ? 'video' : 'photo'}?`;
-
-            const pillsEl = document.getElementById('evTagPills');
-            pillsEl.innerHTML = '';
-            EVIDENCE_ROOMS.forEach(room => {
-                const pill = document.createElement('div');
-                pill.style.cssText = `padding:12px;border-radius:10px;border:2px solid ${existing===room?'#1fc8c8':'#e9ecef'};background:${existing===room?'#1fc8c8':'#f8f9fa'};font-size:14px;font-weight:600;cursor:pointer;text-align:center;color:${existing===room?'white':'#444'};`;
-                pill.textContent = room;
-                pill.onclick = () => {
-                    evidenceSelectedRoom = room;
-                    pillsEl.querySelectorAll('div').forEach(p => {
-                        p.style.background='#f8f9fa'; p.style.borderColor='#e9ecef'; p.style.color='#444';
-                    });
-                    pill.style.background='#1fc8c8'; pill.style.borderColor='#1fc8c8'; pill.style.color='white';
-                    const other = document.getElementById('evTagOther');
-                    other.style.display = room === 'Other' ? 'block' : 'none';
-                    if (room !== 'Other') other.value = '';
-                };
-                pillsEl.appendChild(pill);
-            });
-
-            const otherInput = document.getElementById('evTagOther');
-            if (existing && !EVIDENCE_ROOMS.slice(0,-1).includes(existing)) {
-                otherInput.style.display='block'; otherInput.value=existing; evidenceSelectedRoom='Other';
-            } else { otherInput.style.display='none'; otherInput.value=''; }
-
-            modalEl.style.display = 'flex';
-        };
-
-        window.confirmEvidenceTag = function() {
-            if (!evidenceSelectedRoom) { alert('Please select a location first.'); return; }
-            const other = document.getElementById('evTagOther');
-            const finalTag = evidenceSelectedRoom === 'Other' ? (other.value.trim() || 'Other') : evidenceSelectedRoom;
-            const pair = window.sessionPairs.find(p => p.id === evidencePendingTag.pairId);
-            if (pair) pair[evidencePendingTag.side].tag = finalTag;
-            document.getElementById('evidenceTagModal').style.display = 'none';
-            renderEvidencePairs();
-        };
-
     </script>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- PHOTO BUCKET MODAL (full-screen, mobile-first) -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <div id="photoBucketModal" style="
-        display:none; position:fixed; inset:0; z-index:2000;
-        background:#f5f5f7; flex-direction:column; overflow:hidden;
-    ">
-        <!-- Modal header -->
-        <div style="
-            background:linear-gradient(135deg,#1fc8c8 0%,#12a5a5 100%);
-            color:white; padding:16px 20px;
-            display:flex; align-items:center; justify-content:space-between;
-            flex-shrink:0;
-        ">
-            <div>
-                <div style="font-size:18px; font-weight:800;">📸 Before &amp; After Evidence</div>
-                <div style="font-size:12px; opacity:0.85; margin-top:2px;" id="modalPhotoCount">0 files added</div>
-            </div>
-            <button type="button" onclick="closePhotoBucket()" style="
-                background:rgba(255,255,255,0.2); border:2px solid white;
-                color:white; border-radius:10px; padding:8px 16px;
-                font-size:14px; font-weight:700; cursor:pointer;
-            ">✕ Close</button>
-        </div>
-
-        <!-- Scrollable content -->
-        <div style="flex:1; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch;">
-
-            <!-- Evidence tip -->
-            <div style="background:linear-gradient(135deg,#fff3cd,#ffeaa7); border:2px solid #f0ad4e; border-radius:12px; padding:14px 16px; margin-bottom:14px;">
-                <div style="font-size:14px; font-weight:800; color:#856404; margin-bottom:4px;">⚠️ Protect Spring Sparrow from False Damage Claims</div>
-                <div style="font-size:13px; color:#6d4c00; line-height:1.6;">
-                    We suspect guests may have damaged items or exaggerated minor issues to break their contract. <strong>Your documentation is our best protection.</strong>
-                </div>
-                <button type="button" onclick="toggleEvidenceTip()" id="evidenceTipBtn"
-                    style="background:none;border:none;color:#856404;font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;margin-top:6px;padding:0;">
-                    Show what to document ▼
-                </button>
-                <div id="evidenceTipBody" style="display:none; margin-top:10px; font-size:12px; color:#6d4c00; line-height:1.6;">
-                    Close-ups of: beds &amp; mattresses, furniture, dressers, stove, fridge, TV, windows &amp; screens, thermostat, bathroom fixtures, towel bars, light fixtures, doors &amp; locks.
-                    <div style="margin-top:8px; padding:8px; background:rgba(255,255,255,0.6); border-radius:8px; font-size:11px;">
-                        💡 <em>A guest once bent a window screen further and broke the thermostat to fake poor quality — we had no before photos. Don't let that happen again.</em>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Media type guide -->
-            <div style="text-align:center; font-size:13px; color:#0a5858; background:#e8f9f9; border:2px solid #1fc8c8; border-radius:10px 10px 0 0; padding:10px 14px;">
-                📱 Your camera opens for each slot — choose <strong>Photo</strong> or <strong>Video</strong>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; border:2px solid #1fc8c8; border-top:none; border-radius:0 0 10px 10px; overflow:hidden; margin-bottom:14px;">
-                <div style="padding:12px 10px; text-align:center; background:#f0f7ff; border-right:1px solid #1fc8c8;">
-                    <div style="font-size:26px;">🎥</div>
-                    <div style="font-size:12px; font-weight:800; color:#1fc8c8; text-transform:uppercase; letter-spacing:0.5px; margin:4px 0;">Video</div>
-                    <div style="font-size:11px; color:#555; line-height:1.4;">Room walkthroughs — pan slowly</div>
-                </div>
-                <div style="padding:12px 10px; text-align:center; background:#f0fff4;">
-                    <div style="font-size:26px;">📷</div>
-                    <div style="font-size:12px; font-weight:800; color:#1fc8c8; text-transform:uppercase; letter-spacing:0.5px; margin:4px 0;">Close-Up Photo</div>
-                    <div style="font-size:11px; color:#555; line-height:1.4;">Individual items — stove, TV, screens</div>
-                </div>
-            </div>
-
-            <!-- General notes -->
-            <div style="background:white; border-radius:10px; padding:14px; margin-bottom:14px; border:2px solid #e9ecef;">
-                <label style="display:block; font-weight:700; color:#333; margin-bottom:8px; font-size:14px;">🗒️ General Notes</label>
-                <textarea id="generalNotes" placeholder="Overall unit condition, issues noticed, anything the property manager should know..."
-                    style="width:100%; padding:10px; border:2px solid #ddd; border-radius:8px; font-size:15px; min-height:80px; font-family:inherit; resize:vertical;"></textarea>
-            </div>
-
-            <!-- Add pair CTA -->
-            <button type="button" onclick="addEvidencePair()" style="
-                width:100%; padding:16px;
-                background:linear-gradient(180deg,#24d9d9 0%,#14a8a8 100%);
-                color:white; border:none; border-radius:12px;
-                font-size:17px; font-weight:800; cursor:pointer;
-                margin-bottom:16px;
-                box-shadow:0 6px 0 #0d7a7a, 0 8px 16px rgba(0,0,0,0.25);
-                text-shadow:0 1px 2px rgba(0,0,0,0.2);
-                display:flex; flex-direction:column; align-items:center; gap:2px;
-            ">
-                <span>➕ Add Before &amp; After Evidence</span>
-                <span style="font-size:13px; font-weight:600; opacity:0.85;">Photo or Video</span>
-            </button>
-
-            <!-- Pairs render here -->
-            <div id="evidencePairs" style="display:flex; flex-direction:column; gap:14px; padding-bottom:30px;"></div>
-        </div>
-
-        <!-- Sticky footer — Done button -->
-        <div style="
-            flex-shrink:0; padding:14px 16px;
-            background:white; border-top:2px solid #e9ecef;
-            box-shadow:0 -4px 12px rgba(0,0,0,0.08);
-        ">
-            <button type="button" onclick="closePhotoBucket()" style="
-                width:100%; padding:16px;
-                background:linear-gradient(135deg,#1fc8c8 0%,#12a5a5 100%);
-                color:white; border:none; border-radius:12px;
-                font-size:17px; font-weight:800; cursor:pointer;
-                box-shadow:0 4px 12px rgba(31,200,200,0.4);
-            ">✅ Done — Return to Checklist</button>
-        </div>
-    </div>
-
 </body>
 </html>
